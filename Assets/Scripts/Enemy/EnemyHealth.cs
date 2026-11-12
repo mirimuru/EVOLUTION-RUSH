@@ -12,7 +12,11 @@ public class EnemyHealth : MonoBehaviour
 
     private void Awake()
     {
-        currentHealth = maxHealth;
+        float difficultyMultiplier = GameSettings.Instance != null
+            ? GameSettings.Instance.EnemyHealthMultiplier
+            : 1f;
+
+        currentHealth = Mathf.Max(1, Mathf.CeilToInt(maxHealth * difficultyMultiplier));
     }
 
     /// <summary>
