@@ -39,10 +39,17 @@ public class EnemyAI : MonoBehaviour
         }
 
         direction.Normalize();
+
+        float difficultyMultiplier = GameSettings.Instance != null
+            ? GameSettings.Instance.EnemyMoveSpeedMultiplier
+            : 1f;
+
+        float currentMoveSpeed = moveSpeed * difficultyMultiplier;
+
         rb.linearVelocity = new Vector3(
-            direction.x * moveSpeed,
+            direction.x * currentMoveSpeed,
             rb.linearVelocity.y,
-            direction.z * moveSpeed
+            direction.z * currentMoveSpeed
         );
 
         transform.rotation = Quaternion.LookRotation(direction);
