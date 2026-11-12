@@ -16,7 +16,7 @@ public class EnemyHealth : MonoBehaviour
             ? GameSettings.Instance.EnemyHealthMultiplier
             : 1f;
 
-        currentHealth = Mathf.Max(1, Mathf.CeilToInt(maxHealth * difficultyMultiplier));
+        currentHealth = Mathf.Max(1, Mathf.RoundToInt(maxHealth * difficultyMultiplier));
     }
 
     /// <summary>
