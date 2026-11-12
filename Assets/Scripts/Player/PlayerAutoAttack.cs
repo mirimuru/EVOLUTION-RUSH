@@ -105,19 +105,25 @@ public class PlayerAutoAttack : MonoBehaviour
             Renderer projectileRenderer = projectileObject.GetComponent<Renderer>();
             if (projectileRenderer != null)
             {
-                Material material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-                if (material.shader == null)
+                Shader projectileShader = Shader.Find("Universal Render Pipeline/Lit");
+                if (projectileShader == null)
                 {
-                    material.shader = Shader.Find("Standard");
+                    projectileShader = Shader.Find("Standard");
                 }
 
-                material.color = new Color(0.1f, 0.65f, 1f);
-                if (material.HasProperty("_EmissionColor"))
+                if (projectileShader != null)
                 {
-                    material.EnableKeyword("_EMISSION");
-                    material.SetColor("_EmissionColor", new Color(0.05f, 0.35f, 1f) * 2f);
+                    Material material = new Material(projectileShader);
+                    material.color = new Color(0.1f, 0.65f, 1f);
+
+                    if (material.HasProperty("_EmissionColor"))
+                    {
+                        material.EnableKeyword("_EMISSION");
+                        material.SetColor("_EmissionColor", new Color(0.05f, 0.35f, 1f) * 2f);
+                    }
+
+                    projectileRenderer.material = material;
                 }
-                projectileRenderer.material = material;
             }
 
             SphereCollider sphereCollider = projectileObject.GetComponent<SphereCollider>();
