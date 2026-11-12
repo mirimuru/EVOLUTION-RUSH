@@ -2,13 +2,20 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 操作難易度に応じて攻撃方式を切り替える。
-/// EASY: 最も近い敵を自動攻撃
-/// NORMAL: マウス方向へ自動攻撃
-/// HARD: マウス方向へ左クリックで攻撃
+/// 操作難易度に応じてエネルギー弾の発射方式を切り替える。
+/// EASY: 最も近い敵へ自動照準・自動発射
+/// NORMAL: マウス方向へ照準・自動発射（弱い照準補助あり）
+/// HARD: マウス方向へ照準・左クリックで発射
 /// </summary>
 public class PlayerAutoAttack : MonoBehaviour
 {
+    [Header("Projectile")]
+    [SerializeField] private EnergyProjectile projectilePrefab;
+    [SerializeField] private Transform muzzlePoint;
+    [SerializeField] private float projectileSpeed = 16f;
+    [SerializeField] private float projectileLifetime = 1.2f;
+    [SerializeField] private float projectileSpawnOffset = 0.8f;
+
     [Header("Attack Settings")]
     [SerializeField] private float attackRange = 14f;
     [SerializeField] private float attackInterval = 0.8f;
@@ -18,16 +25,10 @@ public class PlayerAutoAttack : MonoBehaviour
 
     private void Update()
     {
-        if (Time.time < nextAttackTime)
-        {
-            return;
-        }
-
         GameSettings.OperationDifficulty mode = GameSettings.Instance != null
             ? GameSettings.Instance.OperationMode
             : GameSettings.OperationDifficulty.Normal;
 
-        // HARDでは左クリックした瞬間だけ攻撃する。
         if (mode == GameSettings.OperationDifficulty.Hard)
         {
             if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
@@ -36,33 +37,120 @@ public class PlayerAutoAttack : MonoBehaviour
             }
         }
 
-        EnemyHealth target;
-
-        if (mode == GameSettings.OperationDifficulty.Easy)
-        {
-            target = FindNearestEnemy();
-        }
-        else
-        {
-            target = FindAimedEnemy();
-        }
-
-        if (target == null)
+        if (Time.time < nextAttackTime)
         {
             return;
         }
 
-        target.TakeDamage(attackDamage);
+        Vector3 attackDirection;
+
+        if (mode == GameSettings.OperationDifficulty.Easy)
+        {
+            EnemyHealth target = FindNearestEnemy();
+            if (target == null)
+            {
+                return;
+            }
+
+            attackDirection = GetDirectionTo(target.transform.position);
+        }
+        else
+        {
+            attackDirection = GetMouseAimDirection();
+
+            // NORMAL/HARDは照準方向に敵がいれば、少しだけ敵側へ補正する。
+            EnemyHealth assistedTarget = FindAimedEnemy(attackDirection);
+            if (assistedTarget != null)
+            {
+                attackDirection = GetDirectionTo(assistedTarget.transform.position);
+            }
+        }
+
+        if (attackDirection.sqrMagnitude < 0.001f)
+        {
+            return;
+        }
+
+        FireProjectile(attackDirection);
         nextAttackTime = Time.time + attackInterval;
     }
 
-    /// <summary>
-    /// 攻撃範囲内で最も近い敵を探す。
-    /// </summary>
+    private void FireProjectile(Vector3 direction)
+    {
+        Vector3 spawnPosition;
+
+        if (muzzlePoint != null)
+        {
+            spawnPosition = muzzlePoint.position;
+        }
+        else
+        {
+            spawnPosition = transform.position + Vector3.up * 0.7f + direction * projectileSpawnOffset;
+        }
+
+        EnergyProjectile projectile;
+
+        if (projectilePrefab != null)
+        {
+            projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.LookRotation(direction));
+        }
+        else
+        {
+            // Prefab未設定でも動作確認できるよう、青い球体をその場で生成する。
+            GameObject projectileObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            projectileObject.name = "EnergyProjectile_Runtime";
+            projectileObject.transform.position = spawnPosition;
+            projectileObject.transform.localScale = Vector3.one * 0.35f;
+
+            Renderer projectileRenderer = projectileObject.GetComponent<Renderer>();
+            if (projectileRenderer != null)
+            {
+                Material material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                if (material.shader == null)
+                {
+                    material.shader = Shader.Find("Standard");
+                }
+
+                material.color = new Color(0.1f, 0.65f, 1f);
+                if (material.HasProperty("_EmissionColor"))
+                {
+                    material.EnableKeyword("_EMISSION");
+                    material.SetColor("_EmissionColor", new Color(0.05f, 0.35f, 1f) * 2f);
+                }
+                projectileRenderer.material = material;
+            }
+
+            SphereCollider sphereCollider = projectileObject.GetComponent<SphereCollider>();
+            sphereCollider.isTrigger = true;
+            projectileObject.AddComponent<Rigidbody>();
+            projectile = projectileObject.AddComponent<EnergyProjectile>();
+        }
+
+        // 自分自身に弾が当たらないようにする。
+        Collider[] playerColliders = GetComponentsInChildren<Collider>();
+        Collider[] projectileColliders = projectile.GetComponents<Collider>();
+
+        foreach (Collider playerCollider in playerColliders)
+        {
+            foreach (Collider projectileCollider in projectileColliders)
+            {
+                Physics.IgnoreCollision(playerCollider, projectileCollider);
+            }
+        }
+
+        projectile.Initialize(direction, projectileSpeed, attackDamage, projectileLifetime);
+    }
+
+    private Vector3 GetDirectionTo(Vector3 targetPosition)
+    {
+        Vector3 direction = targetPosition - transform.position;
+        direction.y = 0f;
+        return direction.sqrMagnitude > 0.001f ? direction.normalized : transform.forward;
+    }
+
     private EnemyHealth FindNearestEnemy()
     {
         EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
-
         EnemyHealth nearestEnemy = null;
         float nearestDistanceSqr = attackRange * attackRange;
 
@@ -87,14 +175,8 @@ public class PlayerAutoAttack : MonoBehaviour
         return nearestEnemy;
     }
 
-    /// <summary>
-    /// マウスで指定した方向にいる敵を探す。
-    /// NORMALは照準補助が広く、HARDは狭い。
-    /// </summary>
-    private EnemyHealth FindAimedEnemy()
+    private EnemyHealth FindAimedEnemy(Vector3 aimDirection)
     {
-        Vector3 aimDirection = GetMouseAimDirection();
-
         if (aimDirection.sqrMagnitude < 0.001f)
         {
             return null;
@@ -126,10 +208,8 @@ public class PlayerAutoAttack : MonoBehaviour
                 continue;
             }
 
-            Vector3 directionToEnemy = offset.normalized;
-            float dot = Vector3.Dot(aimDirection, directionToEnemy);
-
-            if (dot >= minimumDot)
+            float dot = Vector3.Dot(aimDirection, offset.normalized);
+            if (dot >= minimumDot && distanceSqr < nearestDistanceSqr)
             {
                 nearestDistanceSqr = distanceSqr;
                 nearestEnemy = enemy;
@@ -139,9 +219,6 @@ public class PlayerAutoAttack : MonoBehaviour
         return nearestEnemy;
     }
 
-    /// <summary>
-    /// カメラからマウス位置へRayを飛ばし、プレイヤーと同じ高さの平面との交点を求める。
-    /// </summary>
     private Vector3 GetMouseAimDirection()
     {
         if (Mouse.current == null || Camera.main == null)
@@ -167,7 +244,13 @@ public class PlayerAutoAttack : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, attackRange);
+
+        if (muzzlePoint != null)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawSphere(muzzlePoint.position, 0.12f);
+        }
     }
 }
