@@ -22,6 +22,7 @@ public class GameSessionManager : MonoBehaviour
     private PlayerExperience playerExperience;
 
     public bool IsRunning => isRunning && !hasFinished;
+    public bool HasFinished => hasFinished;
     public float RemainingTime => Mathf.Max(0f, runDuration - elapsedTime);
     public float ElapsedTime => elapsedTime;
     public float Progress => Mathf.Clamp01(elapsedTime / runDuration);
