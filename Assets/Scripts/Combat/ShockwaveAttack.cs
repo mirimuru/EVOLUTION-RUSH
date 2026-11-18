@@ -61,7 +61,7 @@ public class ShockwaveAttack : MonoBehaviour
         line.useWorldSpace = false;
         line.loop = true;
         line.positionCount = 49;
-        line.widthMultiplier = 0.12f;
+        line.widthMultiplier = 0.16f;
         line.numCapVertices = 4;
 
         Shader shader = Shader.Find("Sprites/Default");
@@ -69,12 +69,12 @@ public class ShockwaveAttack : MonoBehaviour
         if (shader != null)
         {
             Material material = new Material(shader);
-            material.color = new Color(0.1f, 0.85f, 1f, 0.9f);
+            material.color = new Color(0.15f, 0.65f, 1f, 0.95f);
             line.material = material;
         }
 
-        line.startColor = new Color(0.1f, 0.85f, 1f, 0.95f);
-        line.endColor = new Color(0.1f, 0.85f, 1f, 0.15f);
+        line.startColor = new Color(0.65f, 0.95f, 1f, 1f);
+        line.endColor = new Color(0.35f, 0.15f, 1f, 0.05f);
 
         float elapsed = 0f;
         while (elapsed < visualDuration)
