@@ -46,8 +46,8 @@ public class NeonCharacterVisuals : MonoBehaviour
         Part(PrimitiveType.Sphere, "EnemyShell", new Vector3(0f, 0f, 0f), new Vector3(0.82f, 0.9f, 0.78f), shell);
         Part(PrimitiveType.Sphere, "EnemyCore", new Vector3(0f, 0.04f, 0.39f), new Vector3(0.3f, 0.3f, 0.16f), core);
         Part(PrimitiveType.Cube, "EnemyFront", new Vector3(0f, 0.28f, 0.36f), new Vector3(0.52f, 0.12f, 0.18f), dark);
-        Part(PrimitiveType.Cone, "LeftHorn", new Vector3(-0.28f, 0.48f, 0f), new Vector3(0.22f, 0.42f, 0.22f), shell);
-        Part(PrimitiveType.Cone, "RightHorn", new Vector3(0.28f, 0.48f, 0f), new Vector3(0.22f, 0.42f, 0.22f), shell);
+        Part(PrimitiveType.Cylinder, "LeftHorn", new Vector3(-0.28f, 0.48f, 0f), new Vector3(0.22f, 0.42f, 0.22f), shell);
+        Part(PrimitiveType.Cylinder, "RightHorn", new Vector3(0.28f, 0.48f, 0f), new Vector3(0.22f, 0.42f, 0.22f), shell);
     }
 
     public void BuildBoss()
