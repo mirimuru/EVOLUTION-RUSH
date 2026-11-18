@@ -72,11 +72,11 @@ public class OrbitingOrbAttack : MonoBehaviour
                 if (shader != null)
                 {
                     Material material = new Material(shader);
-                    material.color = new Color(0.1f, 0.85f, 1f);
+                    material.color = new Color(0.08f, 0.55f, 1f);
                     if (material.HasProperty("_EmissionColor"))
                     {
                         material.EnableKeyword("_EMISSION");
-                        material.SetColor("_EmissionColor", new Color(0.05f, 0.5f, 1f) * 2f);
+                        material.SetColor("_EmissionColor", new Color(0.02f, 0.65f, 1f) * 3.5f);
                     }
                     renderer.material = material;
                 }
