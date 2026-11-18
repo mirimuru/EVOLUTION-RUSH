@@ -191,6 +191,27 @@ public class GameSessionManager : MonoBehaviour
             if (orb != null) Destroy(orb.gameObject);
         }
 
+        EnergyProjectile[] projectiles = FindObjectsByType<EnergyProjectile>(FindObjectsSortMode.None);
+        foreach (EnergyProjectile projectile in projectiles)
+        {
+            if (projectile != null) Destroy(projectile.gameObject);
+        }
+
+        // 攻撃演出の途中で終了した場合に残る一時オブジェクトも片付ける。
+        Transform[] sceneTransforms = FindObjectsByType<Transform>(FindObjectsSortMode.None);
+        foreach (Transform sceneTransform in sceneTransforms)
+        {
+            if (sceneTransform == null) continue;
+
+            string objectName = sceneTransform.gameObject.name;
+            if (objectName == "MeteorWarning" || objectName == "Meteor" ||
+                objectName == "MeteorExplosion" || objectName == "ShockwaveVisual" ||
+                objectName == "LightningVisual" || objectName == "EnemyHitEffect")
+            {
+                Destroy(sceneTransform.gameObject);
+            }
+        }
+
         EnemySpawner[] spawners = FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None);
         foreach (EnemySpawner spawner in spawners)
         {
