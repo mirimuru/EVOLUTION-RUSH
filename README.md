@@ -121,7 +121,7 @@
 - レベルアップ時に「進化コア」を取得できる。所持上限は3個で、画面上部に所持数を表示する。
 - 分岐強化済みで、通常の数値強化を合計2回以上取得した攻撃は、進化コア1個を消費して進化できる。
 - 個別進化：レールエネルギー、オービタルストーム、ノヴァウェーブ、チェインテンペスト、メテオレイン。
-- エネルギー弾と雷撃を両方所持し、両方が分岐強化済み・通常強化2回以上の場合、特殊進化「プラズマキャノン」を選択できる。進化コア1個で両方を同時に進化させる。
+- エネルギー弾と雷撃を両方所持し、両方が分岐強化済み・通常強化2回以上の場合、特殊進化「プラズマキャノン」を選択できる。進化コア1個で両方を同時に進化させ、さらにエネルギー弾の威力・連射性能と雷撃の威力・連鎖性能に追加ボーナスを与える。
 - 進化・分岐強化は既存攻撃の性能を強化する方式で、操作キーや操作難易度は増やさない。
 - 進化候補は通常の3択に混ざって抽選される。条件を満たしても、候補に出ない場合は次のレベルアップで再抽選される。
 
@@ -133,19 +133,20 @@
 |---|---|
 | `Assets/Scripts/Player/PlayerController.cs` | プレイヤー移動、開始位置の保存とリスタート時の位置復元 |
 | `Assets/Scripts/Player/PlayerHealth.cs` | プレイヤーHP、ダメージ、短時間の被ダメージ無効化、死亡判定 |
-| `Assets/Scripts/Player/PlayerAutoAttack.cs` | 操作難易度に応じたエネルギー弾の照準・発射 |
+| `Assets/Scripts/Player/PlayerAutoAttack.cs` | 操作難易度に応じたエネルギー弾の照準・発射、分岐強化・進化・プラズマ融合ボーナス |
 | `Assets/Scripts/Player/PlayerExperience.cs` | 経験値、レベルアップ、通常強化・分岐強化・進化コア・個別進化・特殊進化の選択、デバッグ経験値操作 |
 | `Assets/Scripts/Camera/CameraFollow.cs` | カメラ追従 |
 | `Assets/Scripts/Enemy/EnemyAI.cs` | 敵の追跡移動、接近時の接触攻撃 |
 | `Assets/Scripts/Enemy/EnemySpawner.cs` | 敵の生成と最大数管理、再挑戦時のタイマー初期化 |
-| `Assets/Scripts/Enemy/EnemyHealth.cs` | 敵HP、被弾、死亡、経験値ドロップ、時間経過HP倍率、被弾演出用マテリアルの解放 |\n| `Assets/Scripts/Enemy/BossAI.cs` | ボス追跡移動と予告付き範囲攻撃 |
+| `Assets/Scripts/Enemy/EnemyHealth.cs` | 敵HP、被弾、死亡、経験値ドロップ、時間経過HP倍率、被弾演出用マテリアルの解放 |
+| `Assets/Scripts/Enemy/BossAI.cs` | ボス追跡移動と予告付き範囲攻撃 |
 | `Assets/Scripts/Combat/EnergyProjectile.cs` | エネルギー弾の物理・命中処理 |
 | `Assets/Scripts/Combat/EnemyHitEffect.cs` | エネルギー弾命中時のパーティクル |
-| `Assets/Scripts/Combat/OrbitingOrbAttack.cs` | 回転オーブの生成・回転・攻撃 |
+| `Assets/Scripts/Combat/OrbitingOrbAttack.cs` | 回転オーブの生成・回転・攻撃、分岐強化・進化 |
 | `Assets/Scripts/Combat/OrbitingOrbHitbox.cs` | 回転オーブの接触判定 |
-| `Assets/Scripts/Combat/ShockwaveAttack.cs` | 衝撃波の範囲攻撃・円形演出 |
-| `Assets/Scripts/Combat/LightningAttack.cs` | 雷撃・連鎖対象の選択・雷エフェクト |
-| `Assets/Scripts/Combat/MeteorAttack.cs` | メテオの狙い（敵の密集地点）・着弾予告・落下・爆発範囲ダメージ・演出 |
+| `Assets/Scripts/Combat/ShockwaveAttack.cs` | 衝撃波の範囲攻撃・円形演出、分岐強化・進化 |
+| `Assets/Scripts/Combat/LightningAttack.cs` | 雷撃・連鎖対象の選択・雷エフェクト、分岐強化・進化・プラズマ融合ボーナス |
+| `Assets/Scripts/Combat/MeteorAttack.cs` | メテオの狙い（敵の密集地点）・着弾予告・落下・爆発範囲ダメージ・演出、分岐強化・進化 |
 | `Assets/Scripts/Game/ExperienceOrb.cs` | 経験値オーブの生成・回収 |
 | `Assets/Scripts/Game/GameSessionManager.cs` | 180秒タイマー、進行度、敵撃破数、ボス撃破クリア、ゲームオーバー、リザルト、再挑戦、デバッグ用時間加算 |
 | `Assets/Scripts/Game/GameSettings.cs` | 操作難易度・ゲーム難易度の管理 |
