@@ -127,17 +127,29 @@
 
 ---
 
+## 2.5 ビジュアルデザイン（NEON ARENA・初期実装）
+
+デザイン方針：近未来ネオン、エネルギー戦士、円形アリーナ、電子音楽。
+
+- アリーナ：暗い円形フロア、シアン／紫の発光リング、放射状ライン、外周ライト柱をランタイム生成する。
+- プレイヤー：暗色アーマー、シアンの胸部コア・バイザー・装甲ラインを持つ人型シルエットをランタイム生成する。
+- 通常敵：暗紫色の機械生命体に赤い発光コアを配置する。
+- ボス：大型の紫色装甲と青白いコアを持つシルエットにする。
+- 現段階はUnity標準プリミティブによる仮モデル。専用3Dモデル・テクスチャ・Bloomを導入する際に差し替えられるよう、当たり判定と表示モデルを分離している。
+- アリーナは `RuntimeInitializeOnLoadMethod(AfterSceneLoad)` で自動生成するため、`SampleScene.unity` の編集やInspectorでの手動配置は不要。
+- `NeonArenaVisuals` は時間経過に合わせて外周ライトの発光を強める。
+
 ## 3. 主なスクリプト構成
 
 | ファイル | 役割 |
 |---|---|
-| `Assets/Scripts/Player/PlayerController.cs` | プレイヤー移動、開始位置の保存とリスタート時の位置復元 |
+| `Assets/Scripts/Player/PlayerController.cs` | プレイヤー移動、開始位置の保存とリスタート時の位置復元、ネオン戦士仮モデルの自動生成 |
 | `Assets/Scripts/Player/PlayerHealth.cs` | プレイヤーHP、ダメージ、短時間の被ダメージ無効化、死亡判定 |
 | `Assets/Scripts/Player/PlayerAutoAttack.cs` | 操作難易度に応じたエネルギー弾の照準・発射、分岐強化・進化・プラズマ融合ボーナス |
 | `Assets/Scripts/Player/PlayerExperience.cs` | 経験値、レベルアップ、通常強化・分岐強化・進化コア・個別進化・特殊進化の選択、デバッグ経験値操作 |
 | `Assets/Scripts/Camera/CameraFollow.cs` | カメラ追従 |
 | `Assets/Scripts/Enemy/EnemyAI.cs` | 敵の追跡移動、接近時の接触攻撃 |
-| `Assets/Scripts/Enemy/EnemySpawner.cs` | 敵の生成と最大数管理、再挑戦時のタイマー初期化 |
+| `Assets/Scripts/Enemy/EnemySpawner.cs` | 敵の生成と最大数管理、通常敵・ボスの仮モデル生成、再挑戦時のタイマー初期化 |
 | `Assets/Scripts/Enemy/EnemyHealth.cs` | 敵HP、被弾、死亡、経験値ドロップ、時間経過HP倍率、被弾演出用マテリアルの解放 |
 | `Assets/Scripts/Enemy/BossAI.cs` | ボス追跡移動と予告付き範囲攻撃 |
 | `Assets/Scripts/Combat/EnergyProjectile.cs` | エネルギー弾の物理・命中処理 |
@@ -150,6 +162,8 @@
 | `Assets/Scripts/Game/ExperienceOrb.cs` | 経験値オーブの生成・回収 |
 | `Assets/Scripts/Game/GameSessionManager.cs` | 180秒タイマー、進行度、敵撃破数、ボス撃破クリア、ゲームオーバー、リザルト、再挑戦、デバッグ用時間加算 |
 | `Assets/Scripts/Game/GameSettings.cs` | 操作難易度・ゲーム難易度の管理 |
+| `Assets/Scripts/Visual/NeonArenaVisuals.cs` | 円形ネオンアリーナ、床リング、外周ライトの自動生成・時間連動発光 | 
+| `Assets/Scripts/Visual/NeonCharacterVisuals.cs` | プレイヤー・通常敵・ボスの仮モデル生成、専用モデルへの差し替え基盤 |
 
 ### 実装上の注意
 
@@ -191,7 +205,15 @@ Unityに戻り、スクリプトのコンパイルが完了するまで待つ。
 
 優先度順。実装段階が完了して次の段階へ進んだ時点で、前段階を「完了」としてこのREADMEを更新する。ユーザーから機能ごとの動作報告を受け取ることを、完了判定の条件にしない。
 
-### 次の開発段階：タイトル画面・ゲーム開始導線
+### 次の開発段階：ネオン演出・サウンド・UIの統一
+
+1. 攻撃5種類の色・発光・着弾エフェクトをネオン配色へ統一する。
+2. プレイヤー被弾、敵撃破、レベルアップ、進化、ボス登場の演出を追加する。
+3. 電子音楽BGMと攻撃・被弾・撃破・レベルアップの効果音を実装する。
+4. HP・経験値・タイマー・強化選択・リザルトUIをネオン調に統一する。
+5. Bloom等のポストプロセスは使用中のRender Pipelineを確認してから導入する。
+
+### その後：タイトル画面・ゲーム開始導線
 
 1. タイトル画面、ゲーム開始、操作説明を整える。
 2. UI、エフェクト、効果音、BGMを調整する。
@@ -208,7 +230,11 @@ Unityに戻り、スクリプトのコンパイルが完了するまで待つ。
 
 ---
 
-## 6. 設計方針・今後の実装ルール
+## 6. 開発履歴
+
+- 2026-11-19：NEONデザイン方針を確定。`NeonArenaVisuals` と `NeonCharacterVisuals` を追加し、円形アリーナ・プレイヤー・敵・ボスの仮ビジュアルを自動生成する基盤を実装。`SampleScene.unity` は変更しない。
+
+## 7. 設計方針・今後の実装ルール
 
 - 基本攻撃は5種類を目標とする：エネルギー弾、回転オーブ、衝撃波、雷撃、メテオ。
 - 最初からすべての攻撃を持たせず、初期攻撃はエネルギー弾1種類。レベルアップで新しい攻撃を取得する方式。
