@@ -28,7 +28,9 @@ public class PlayerExperience : MonoBehaviour
         MeteorCount,
         MeteorRadius,
         MeteorDamage,
-        MeteorCooldown
+        MeteorCooldown,
+        EnergyBranch, OrbBranch, ShockwaveBranch, LightningBranch, MeteorBranch,
+        EvolutionCore, EvolveEnergy, EvolveOrb, EvolveShockwave, EvolveLightning, EvolveMeteor, PlasmaFusion
     }
 
     private class UpgradeChoice
@@ -36,12 +38,14 @@ public class PlayerExperience : MonoBehaviour
         public UpgradeKind kind;
         public string title;
         public string description;
+        public bool variant;
 
-        public UpgradeChoice(UpgradeKind kind, string title, string description)
+        public UpgradeChoice(UpgradeKind kind, string title, string description, bool variant = false)
         {
             this.kind = kind;
             this.title = title;
             this.description = description;
+            this.variant = variant;
         }
     }
 
@@ -58,6 +62,7 @@ public class PlayerExperience : MonoBehaviour
     private MeteorAttack meteorAttack;
     private readonly List<UpgradeChoice> choices = new List<UpgradeChoice>();
     private bool choosingUpgrade;
+    private int evolutionCores;
     private float previousTimeScale = 1f;
     private Vector2 upgradeScrollPosition;
 
@@ -103,6 +108,7 @@ public class PlayerExperience : MonoBehaviour
         currentExperience = 0;
         experienceToNextLevel = 5;
         choices.Clear();
+        evolutionCores = 0;
         upgradeScrollPosition = Vector2.zero;
 
         if (playerAttack != null)
@@ -244,6 +250,38 @@ public class PlayerExperience : MonoBehaviour
                 available.Add(new UpgradeChoice(UpgradeKind.MeteorCooldown, "メテオ：発動間隔短縮", "メテオがより短い間隔で落ちる"));
         }
 
+        if (playerAttack != null && !playerAttack.BranchChosen)
+            available.Add(new UpgradeChoice(UpgradeKind.EnergyBranch, "エネルギー弾：分岐強化", "連射型または重撃型を選ぶ"));
+        if (orbitingOrbAttack != null && !orbitingOrbAttack.BranchChosen)
+            available.Add(new UpgradeChoice(UpgradeKind.OrbBranch, "回転オーブ：分岐強化", "オーブ増加型または高威力型を選ぶ"));
+        if (shockwaveAttack != null && !shockwaveAttack.BranchChosen)
+            available.Add(new UpgradeChoice(UpgradeKind.ShockwaveBranch, "衝撃波：分岐強化", "広範囲型または高速発動型を選ぶ"));
+        if (lightningAttack != null && !lightningAttack.BranchChosen)
+            available.Add(new UpgradeChoice(UpgradeKind.LightningBranch, "雷撃：分岐強化", "連鎖型または高威力型を選ぶ"));
+        if (meteorAttack != null && !meteorAttack.BranchChosen)
+            available.Add(new UpgradeChoice(UpgradeKind.MeteorBranch, "メテオ：分岐強化", "隕石雨型または大爆発型を選ぶ"));
+
+        if (evolutionCores < 3)
+            available.Add(new UpgradeChoice(UpgradeKind.EvolutionCore, "進化アイテム：進化コア", "攻撃の進化に必要なコアを1個獲得"));
+
+        if (evolutionCores > 0)
+        {
+            if (playerAttack != null && playerAttack.BranchChosen && playerAttack.TotalUpgradeLevel >= 2 && !playerAttack.IsEvolved)
+                available.Add(new UpgradeChoice(UpgradeKind.EvolveEnergy, "進化：レールエネルギー", "エネルギー弾の威力・弾速・連射性能が上昇"));
+            if (orbitingOrbAttack != null && orbitingOrbAttack.BranchChosen && orbitingOrbAttack.TotalUpgradeLevel >= 2 && !orbitingOrbAttack.IsEvolved)
+                available.Add(new UpgradeChoice(UpgradeKind.EvolveOrb, "進化：オービタルストーム", "オーブの威力・軌道半径・回転速度が上昇"));
+            if (shockwaveAttack != null && shockwaveAttack.BranchChosen && shockwaveAttack.TotalUpgradeLevel >= 2 && !shockwaveAttack.IsEvolved)
+                available.Add(new UpgradeChoice(UpgradeKind.EvolveShockwave, "進化：ノヴァウェーブ", "衝撃波の範囲・威力・発動速度が大幅上昇"));
+            if (lightningAttack != null && lightningAttack.BranchChosen && lightningAttack.TotalUpgradeLevel >= 2 && !lightningAttack.IsEvolved)
+                available.Add(new UpgradeChoice(UpgradeKind.EvolveLightning, "進化：チェインテンペスト", "雷撃の威力と連鎖数が大幅上昇"));
+            if (meteorAttack != null && meteorAttack.BranchChosen && meteorAttack.TotalUpgradeLevel >= 2 && !meteorAttack.IsEvolved)
+                available.Add(new UpgradeChoice(UpgradeKind.EvolveMeteor, "進化：メテオレイン", "隕石の威力と爆発範囲が大幅上昇"));
+            if (playerAttack != null && lightningAttack != null && playerAttack.BranchChosen && lightningAttack.BranchChosen &&
+                playerAttack.TotalUpgradeLevel >= 2 && lightningAttack.TotalUpgradeLevel >= 2 &&
+                !playerAttack.IsEvolved && !lightningAttack.IsEvolved)
+                available.Add(new UpgradeChoice(UpgradeKind.PlasmaFusion, "特殊進化：プラズマキャノン", "エネルギー弾と雷撃を融合。両方の攻撃が同時に進化する"));
+        }
+
         int count = Mathf.Min(3, available.Count);
         for (int i = 0; i < count; i++)
         {
@@ -340,6 +378,28 @@ public class PlayerExperience : MonoBehaviour
                 break;
             case UpgradeKind.MeteorCooldown:
                 applied = meteorAttack != null && meteorAttack.ApplyCooldownUpgrade();
+                break;
+            case UpgradeKind.EnergyBranch: applied = playerAttack != null && playerAttack.ApplyBranchUpgrade(choice.variant); break;
+            case UpgradeKind.OrbBranch: applied = orbitingOrbAttack != null && orbitingOrbAttack.ApplyBranchUpgrade(choice.variant); break;
+            case UpgradeKind.ShockwaveBranch: applied = shockwaveAttack != null && shockwaveAttack.ApplyBranchUpgrade(choice.variant); break;
+            case UpgradeKind.LightningBranch: applied = lightningAttack != null && lightningAttack.ApplyBranchUpgrade(choice.variant); break;
+            case UpgradeKind.MeteorBranch: applied = meteorAttack != null && meteorAttack.ApplyBranchUpgrade(choice.variant); break;
+            case UpgradeKind.EvolutionCore:
+                if (evolutionCores < 3) { evolutionCores++; applied = true; }
+                break;
+            case UpgradeKind.EvolveEnergy: applied = playerAttack != null && playerAttack.ApplyEvolution(); if (applied) evolutionCores--; break;
+            case UpgradeKind.EvolveOrb: applied = orbitingOrbAttack != null && orbitingOrbAttack.ApplyEvolution(); if (applied) evolutionCores--; break;
+            case UpgradeKind.EvolveShockwave: applied = shockwaveAttack != null && shockwaveAttack.ApplyEvolution(); if (applied) evolutionCores--; break;
+            case UpgradeKind.EvolveLightning: applied = lightningAttack != null && lightningAttack.ApplyEvolution(); if (applied) evolutionCores--; break;
+            case UpgradeKind.EvolveMeteor: applied = meteorAttack != null && meteorAttack.ApplyEvolution(); if (applied) evolutionCores--; break;
+            case UpgradeKind.PlasmaFusion:
+                if (playerAttack != null && lightningAttack != null && evolutionCores > 0)
+                {
+                    bool energyOk = playerAttack.ApplyEvolution();
+                    bool lightningOk = lightningAttack.ApplyEvolution();
+                    applied = energyOk && lightningOk;
+                    if (applied) evolutionCores--;
+                }
                 break;
         }
 
