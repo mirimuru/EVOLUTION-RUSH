@@ -14,6 +14,7 @@ public class EnemyAI : MonoBehaviour
     private Rigidbody rb;
     private Transform target;
     private float nextContactAttackTime;
+    private float runSpeedMultiplier = 1f;
 
     private void Awake()
     {
@@ -23,6 +24,11 @@ public class EnemyAI : MonoBehaviour
     public void SetTarget(Transform newTarget)
     {
         target = newTarget;
+    }
+
+    public void SetRunSpeedMultiplier(float multiplier)
+    {
+        runSpeedMultiplier = Mathf.Max(0.1f, multiplier);
     }
 
     private void FixedUpdate()
@@ -61,7 +67,7 @@ public class EnemyAI : MonoBehaviour
             ? GameSettings.Instance.EnemyMoveSpeedMultiplier
             : 1f;
 
-        float currentMoveSpeed = moveSpeed * difficultyMultiplier;
+        float currentMoveSpeed = moveSpeed * difficultyMultiplier * runSpeedMultiplier;
 
         rb.linearVelocity = new Vector3(
             direction.x * currentMoveSpeed,
