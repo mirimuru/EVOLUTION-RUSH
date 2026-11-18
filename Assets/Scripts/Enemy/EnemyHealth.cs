@@ -8,6 +8,7 @@ public class EnemyHealth : MonoBehaviour
 {
     [Header("Health Settings")]
     [SerializeField] private int maxHealth = 3;
+    [SerializeField] private int experienceValue = 1;
 
     [Header("Hit Feedback")]
     [SerializeField] private float flashDuration = 0.08f;
@@ -128,6 +129,8 @@ public class EnemyHealth : MonoBehaviour
 
     private void Die()
     {
+        // 敵を倒した位置に経験値オーブを出現させる。
+        ExperienceOrb.Create(transform.position + Vector3.up * 0.5f, experienceValue);
         Destroy(gameObject);
     }
 }
