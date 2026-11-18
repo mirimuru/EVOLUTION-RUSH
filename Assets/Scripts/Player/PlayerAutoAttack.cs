@@ -23,6 +23,61 @@ public class PlayerAutoAttack : MonoBehaviour
 
     private float nextAttackTime;
 
+    [Header("Upgrade Levels")]
+    [SerializeField] private int damageUpgradeLevel;
+    [SerializeField] private int fireRateUpgradeLevel;
+    [SerializeField] private int projectileSpeedUpgradeLevel;
+    [SerializeField] private int attackRangeUpgradeLevel;
+
+    public int DamageUpgradeLevel => damageUpgradeLevel;
+    public int FireRateUpgradeLevel => fireRateUpgradeLevel;
+    public int ProjectileSpeedUpgradeLevel => projectileSpeedUpgradeLevel;
+    public int AttackRangeUpgradeLevel => attackRangeUpgradeLevel;
+
+    public int CurrentDamage => attackDamage;
+    public float CurrentAttackInterval => attackInterval;
+    public float CurrentProjectileSpeed => projectileSpeed;
+    public float CurrentAttackRange => attackRange;
+
+    /// <summary>
+    /// レベルアップなどから呼び出し、エネルギー弾を強化する。
+    /// 各強化は最大5段階。
+    /// </summary>
+    public bool ApplyUpgrade(EnergyAttackUpgradeType upgradeType)
+    {
+        switch (upgradeType)
+        {
+            case EnergyAttackUpgradeType.Damage:
+                if (damageUpgradeLevel >= 5) return false;
+                attackDamage += 1;
+                damageUpgradeLevel++;
+                break;
+
+            case EnergyAttackUpgradeType.FireRate:
+                if (fireRateUpgradeLevel >= 5) return false;
+                attackInterval = Mathf.Max(0.15f, attackInterval * 0.85f);
+                fireRateUpgradeLevel++;
+                break;
+
+            case EnergyAttackUpgradeType.ProjectileSpeed:
+                if (projectileSpeedUpgradeLevel >= 5) return false;
+                projectileSpeed = Mathf.Min(40f, projectileSpeed * 1.15f);
+                projectileSpeedUpgradeLevel++;
+                break;
+
+            case EnergyAttackUpgradeType.AttackRange:
+                if (attackRangeUpgradeLevel >= 5) return false;
+                attackRange = Mathf.Min(30f, attackRange + 2f);
+                attackRangeUpgradeLevel++;
+                break;
+
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
     private void Update()
     {
         GameSettings.OperationDifficulty mode = GameSettings.Instance != null
