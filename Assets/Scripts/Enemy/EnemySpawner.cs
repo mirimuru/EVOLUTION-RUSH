@@ -82,6 +82,9 @@ public class EnemySpawner : MonoBehaviour
         body.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         body.interpolation = RigidbodyInterpolation.Interpolate;
 
+        NeonCharacterVisuals bossVisuals = boss.AddComponent<NeonCharacterVisuals>();
+        bossVisuals.BuildBoss();
+
         EnemyHealth health = boss.AddComponent<EnemyHealth>();
         health.SetMaxHealth(bossHealth);
         BossAI bossAI = boss.AddComponent<BossAI>();
@@ -105,6 +108,10 @@ public class EnemySpawner : MonoBehaviour
         );
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+
+        NeonCharacterVisuals visuals = enemy.GetComponent<NeonCharacterVisuals>();
+        if (visuals == null) visuals = enemy.AddComponent<NeonCharacterVisuals>();
+        visuals.BuildEnemy();
 
         EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
         if (enemyAI != null)
