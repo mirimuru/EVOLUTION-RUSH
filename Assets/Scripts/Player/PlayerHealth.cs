@@ -6,8 +6,10 @@ using UnityEngine;
 public class PlayerHealth : MonoBehaviour
 {
     [SerializeField] private int maxHealth = 100;
+    [SerializeField] private float damageInvulnerabilityTime = 0.35f;
 
     private int currentHealth;
+    private float nextDamageTime;
     private bool isDead;
 
     public int CurrentHealth => currentHealth;
@@ -22,13 +24,14 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (damage <= 0 || isDead || GameSessionManager.Instance == null ||
-            !GameSessionManager.Instance.IsRunning)
+        if (damage <= 0 || isDead || Time.time < nextDamageTime ||
+            GameSessionManager.Instance == null || !GameSessionManager.Instance.IsRunning)
         {
             return;
         }
 
         currentHealth = Mathf.Max(0, currentHealth - damage);
+        nextDamageTime = Time.time + damageInvulnerabilityTime;
 
         if (currentHealth <= 0)
         {
@@ -41,5 +44,6 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth = maxHealth;
         isDead = false;
+        nextDamageTime = 0f;
     }
 }
