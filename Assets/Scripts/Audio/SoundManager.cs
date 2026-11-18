@@ -7,7 +7,7 @@ public class SoundManager : MonoBehaviour
     {
         PlayerShoot, EnemyHit, EnemyDefeated, PlayerDamaged, LevelUp,
         Upgrade, Evolution, BossSpawn, BossAttack, Victory, GameOver,
-        ExperiencePickup, Shockwave, Lightning, Meteor
+        Shockwave, Lightning, Meteor
     }
 
     private static SoundManager instance;
@@ -64,7 +64,6 @@ public class SoundManager : MonoBehaviour
         CreateClip(Effect.BossAttack, rate, 0.32f, 150f, 65f, 0.62f, 0.22f);
         CreateClip(Effect.Victory, rate, 0.85f, 440f, 1320f, 0.10f, 0f);
         CreateClip(Effect.GameOver, rate, 0.75f, 260f, 65f, 0.50f, 0.08f);
-        CreateClip(Effect.ExperiencePickup, rate, 0.11f, 780f, 1480f, 0.08f, 0f);
         CreateClip(Effect.Shockwave, rate, 0.28f, 240f, 80f, 0.16f, 0.18f);
         CreateClip(Effect.Lightning, rate, 0.17f, 1450f, 520f, 0.48f, 0f);
         CreateClip(Effect.Meteor, rate, 0.48f, 95f, 42f, 0.58f, 0.2f);
