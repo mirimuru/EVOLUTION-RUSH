@@ -90,6 +90,7 @@ public class MeteorAttack : MonoBehaviour
             StartCoroutine(MeteorRoutine(best));
         }
 
+        if (usedTargets.Count > 0) SoundManager.Play(SoundManager.Effect.Meteor);
         return usedTargets.Count > 0;
     }
 
