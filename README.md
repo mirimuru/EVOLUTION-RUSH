@@ -53,7 +53,7 @@
 |---|---|---|
 | プレイヤー移動 | 完了 | WASD・矢印キーで移動。開始位置へのリセットに対応 |
 | カメラ追従 | 完了 | プレイヤーを斜め上から追従 |
-| 敵AI | 完了 | プレイヤーを追跡し、接近すると接触ダメージ。時間経過で移動速度が上昇 |
+| 敵AI | 完了 | プレイヤーを追跡し、接近すると接触ダメージ。時間経過・難易度に応じて加速するが、プレイヤーの移動速度の90%を上限とする |
 | 敵スポーン | 完了 | プレイヤー周辺に生成。時間経過で出現頻度・最大数が増加 |
 | 敵のHP・死亡 | 完了 | ダメージを受け、HPが0になると死亡。時間経過でHPが上昇 |
 | 敵の被弾演出 | 完了 | 被弾時に一瞬白く点滅 |
@@ -164,12 +164,12 @@
 
 | ファイル | 役割 |
 |---|---|
-| `Assets/Scripts/Player/PlayerController.cs` | プレイヤー移動、開始位置の保存とリスタート時の位置復元、ネオン戦士仮モデルの自動生成 |
+| `Assets/Scripts/Player/PlayerController.cs` | プレイヤー移動速度の管理、開始位置の保存とリスタート時の位置復元、ネオン戦士仮モデルの自動生成 |
 | `Assets/Scripts/Player/PlayerHealth.cs` | プレイヤーHP、ダメージ、短時間の被ダメージ無効化、死亡判定 |
 | `Assets/Scripts/Player/PlayerAutoAttack.cs` | 操作難易度に応じたエネルギー弾の照準・発射、分岐強化・進化・プラズマ融合ボーナス |
 | `Assets/Scripts/Player/PlayerExperience.cs` | 経験値、レベルアップ、通常強化・分岐強化・進化コア・個別進化・特殊進化の選択、デバッグ経験値操作 |
 | `Assets/Scripts/Camera/CameraFollow.cs` | カメラ追従 |
-| `Assets/Scripts/Enemy/EnemyAI.cs` | 敵の追跡移動、接近時の接触攻撃 |
+| `Assets/Scripts/Enemy/EnemyAI.cs` | 敵の追跡移動、プレイヤー速度の90%を上限とする速度調整、接近時の接触攻撃 |
 | `Assets/Scripts/Enemy/EnemySpawner.cs` | 敵の生成と最大数管理、通常敵・ボスの仮モデル生成、再挑戦時のタイマー初期化 |
 | `Assets/Scripts/Enemy/EnemyHealth.cs` | 敵HP、被弾、死亡時の直接経験値加算、時間経過HP倍率、被弾演出用マテリアルの解放 |
 | `Assets/Scripts/Enemy/BossAI.cs` | ボス追跡移動と予告付き範囲攻撃 |
