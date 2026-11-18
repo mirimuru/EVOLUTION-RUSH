@@ -66,6 +66,7 @@ public class PlayerExperience : MonoBehaviour
     [SerializeField] private bool showDebugPanel;
     [SerializeField] private string debugExperienceInput = "10";
     private string debugMessage = "";
+#endif
 
     public int Level => level;
     public int CurrentExperience => currentExperience;
