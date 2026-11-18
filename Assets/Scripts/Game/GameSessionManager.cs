@@ -123,7 +123,7 @@ public class GameSessionManager : MonoBehaviour
         {
             if (playerHealth != null)
             {
-                GUI.Box(new Rect(Screen.width - 220f, 10f, 210f, 76f),
+                GUI.Box(new Rect(Screen.width - 220f, Screen.height - 92f, 210f, 76f),
                     $"TIME  {FormatTime(RemainingTime)}\nHP  {playerHealth.CurrentHealth}/{playerHealth.MaxHealth}\nKILLS  {defeatedEnemyCount}");
             }
             return;
