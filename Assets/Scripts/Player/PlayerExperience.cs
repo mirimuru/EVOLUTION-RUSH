@@ -251,15 +251,20 @@ public class PlayerExperience : MonoBehaviour
         }
 
         if (playerAttack != null && !playerAttack.BranchChosen)
-            available.Add(new UpgradeChoice(UpgradeKind.EnergyBranch, "エネルギー弾：分岐強化", "連射型または重撃型を選ぶ"));
+            available.Add(new UpgradeChoice(UpgradeKind.EnergyBranch, "エネルギー弾：連射型", "発射間隔を大幅に短縮する", true));
+            available.Add(new UpgradeChoice(UpgradeKind.EnergyBranch, "エネルギー弾：重撃型", "弾の威力と弾速を大きく上げる", false));
         if (orbitingOrbAttack != null && !orbitingOrbAttack.BranchChosen)
-            available.Add(new UpgradeChoice(UpgradeKind.OrbBranch, "回転オーブ：分岐強化", "オーブ増加型または高威力型を選ぶ"));
+            available.Add(new UpgradeChoice(UpgradeKind.OrbBranch, "回転オーブ：群体型", "オーブを2個追加する", true));
+            available.Add(new UpgradeChoice(UpgradeKind.OrbBranch, "回転オーブ：高威力型", "オーブの威力と軌道半径を上げる", false));
         if (shockwaveAttack != null && !shockwaveAttack.BranchChosen)
-            available.Add(new UpgradeChoice(UpgradeKind.ShockwaveBranch, "衝撃波：分岐強化", "広範囲型または高速発動型を選ぶ"));
+            available.Add(new UpgradeChoice(UpgradeKind.ShockwaveBranch, "衝撃波：広範囲型", "攻撃範囲を大きく広げる", true));
+            available.Add(new UpgradeChoice(UpgradeKind.ShockwaveBranch, "衝撃波：高速発動型", "発動間隔を大幅に短縮する", false));
         if (lightningAttack != null && !lightningAttack.BranchChosen)
-            available.Add(new UpgradeChoice(UpgradeKind.LightningBranch, "雷撃：分岐強化", "連鎖型または高威力型を選ぶ"));
+            available.Add(new UpgradeChoice(UpgradeKind.LightningBranch, "雷撃：連鎖型", "連鎖する敵の数を3体増やす", true));
+            available.Add(new UpgradeChoice(UpgradeKind.LightningBranch, "雷撃：高威力型", "雷撃の威力を大きく上げる", false));
         if (meteorAttack != null && !meteorAttack.BranchChosen)
-            available.Add(new UpgradeChoice(UpgradeKind.MeteorBranch, "メテオ：分岐強化", "隕石雨型または大爆発型を選ぶ"));
+            available.Add(new UpgradeChoice(UpgradeKind.MeteorBranch, "メテオ：隕石雨型", "一度に落とす隕石を2個追加する", true));
+            available.Add(new UpgradeChoice(UpgradeKind.MeteorBranch, "メテオ：大爆発型", "爆発範囲を大きく広げる", false));
 
         if (evolutionCores < 3)
             available.Add(new UpgradeChoice(UpgradeKind.EvolutionCore, "進化アイテム：進化コア", "攻撃の進化に必要なコアを1個獲得"));
@@ -419,8 +424,8 @@ public class PlayerExperience : MonoBehaviour
 
     private void OnGUI()
     {
-        GUI.Box(new Rect(Screen.width / 2f - 125f, 10f, 250f, 48f),
-            $"LEVEL {level}    EXP {currentExperience} / {experienceToNextLevel}");
+        GUI.Box(new Rect(Screen.width / 2f - 155f, 10f, 310f, 48f),
+            $"LEVEL {level}    EXP {currentExperience} / {experienceToNextLevel}    CORE {evolutionCores}");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         DrawDebugPanel();
