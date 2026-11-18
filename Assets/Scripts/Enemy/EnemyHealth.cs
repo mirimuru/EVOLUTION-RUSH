@@ -150,8 +150,16 @@ public class EnemyHealth : MonoBehaviour
     {
         EnemyDefeated?.Invoke(this);
 
-        // 敵を倒した位置に経験値オーブを出現させる。
-        ExperienceOrb.Create(transform.position + Vector3.up * 0.5f, experienceValue);
+        // 敵を倒した瞬間に経験値を直接加算する。
+        PlayerExperience playerExperience = FindFirstObjectByType<PlayerExperience>();
+        if (playerExperience != null)
+        {
+            playerExperience.AddExperience(experienceValue);
+        }
+        else
+        {
+            Debug.LogWarning("PlayerExperienceが見つからないため、経験値を加算できません。");
+        }
         Destroy(gameObject);
     }
 
