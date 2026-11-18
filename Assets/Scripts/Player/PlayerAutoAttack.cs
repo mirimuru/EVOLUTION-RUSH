@@ -22,12 +22,24 @@ public class PlayerAutoAttack : MonoBehaviour
     [SerializeField] private int attackDamage = 1;
 
     private float nextAttackTime;
+    private float initialProjectileSpeed;
+    private float initialAttackRange;
+    private float initialAttackInterval;
+    private int initialAttackDamage;
 
     [Header("Upgrade Levels")]
     [SerializeField] private int damageUpgradeLevel;
     [SerializeField] private int fireRateUpgradeLevel;
     [SerializeField] private int projectileSpeedUpgradeLevel;
     [SerializeField] private int attackRangeUpgradeLevel;
+
+    private void Awake()
+    {
+        initialProjectileSpeed = projectileSpeed;
+        initialAttackRange = attackRange;
+        initialAttackInterval = attackInterval;
+        initialAttackDamage = attackDamage;
+    }
 
     public int DamageUpgradeLevel => damageUpgradeLevel;
     public int FireRateUpgradeLevel => fireRateUpgradeLevel;
@@ -76,6 +88,19 @@ public class PlayerAutoAttack : MonoBehaviour
         }
 
         return true;
+    }
+
+    public void ResetUpgrades()
+    {
+        projectileSpeed = initialProjectileSpeed;
+        attackRange = initialAttackRange;
+        attackInterval = initialAttackInterval;
+        attackDamage = initialAttackDamage;
+        damageUpgradeLevel = 0;
+        fireRateUpgradeLevel = 0;
+        projectileSpeedUpgradeLevel = 0;
+        attackRangeUpgradeLevel = 0;
+        nextAttackTime = 0f;
     }
 
     private void Update()
