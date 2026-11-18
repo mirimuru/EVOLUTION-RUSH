@@ -6,15 +6,27 @@ using UnityEngine;
 /// </summary>
 public class PlayerExperience : MonoBehaviour
 {
+    private enum UpgradeKind
+    {
+        EnergyDamage,
+        EnergyFireRate,
+        EnergyProjectileSpeed,
+        EnergyAttackRange,
+        UnlockOrbitingOrb,
+        OrbCount,
+        OrbDamage,
+        OrbSpeed
+    }
+
     private class UpgradeChoice
     {
-        public EnergyAttackUpgradeType type;
+        public UpgradeKind kind;
         public string title;
         public string description;
 
-        public UpgradeChoice(EnergyAttackUpgradeType type, string title, string description)
+        public UpgradeChoice(UpgradeKind kind, string title, string description)
         {
-            this.type = type;
+            this.kind = kind;
             this.title = title;
             this.description = description;
         }
@@ -27,6 +39,7 @@ public class PlayerExperience : MonoBehaviour
     [SerializeField] private float experienceGrowth = 1.35f;
 
     private PlayerAutoAttack playerAttack;
+    private OrbitingOrbAttack orbitingOrbAttack;
     private readonly List<UpgradeChoice> choices = new List<UpgradeChoice>();
     private bool choosingUpgrade;
     private float previousTimeScale = 1f;
@@ -38,21 +51,15 @@ public class PlayerExperience : MonoBehaviour
     private void Awake()
     {
         playerAttack = GetComponent<PlayerAutoAttack>();
-        if (playerAttack == null)
-        {
-            playerAttack = GetComponentInChildren<PlayerAutoAttack>();
-        }
+        if (playerAttack == null) playerAttack = GetComponentInChildren<PlayerAutoAttack>();
+
+        orbitingOrbAttack = GetComponent<OrbitingOrbAttack>();
+        if (orbitingOrbAttack == null) orbitingOrbAttack = GetComponentInChildren<OrbitingOrbAttack>();
     }
 
-    /// <summary>
-    /// 経験値オーブを取得したときに呼び出す。
-    /// </summary>
     public void AddExperience(int amount)
     {
-        if (amount <= 0)
-        {
-            return;
-        }
+        if (amount <= 0) return;
 
         currentExperience += amount;
         Debug.Log($"経験値 +{amount} ({currentExperience}/{experienceToNextLevel})");
@@ -87,25 +94,38 @@ public class PlayerExperience : MonoBehaviour
     private void BuildUpgradeChoices()
     {
         choices.Clear();
-
-        if (playerAttack == null)
-        {
-            return;
-        }
-
         List<UpgradeChoice> available = new List<UpgradeChoice>();
 
-        if (playerAttack.DamageUpgradeLevel < 5)
-            available.Add(new UpgradeChoice(EnergyAttackUpgradeType.Damage, "威力強化", "エネルギー弾のダメージ +1"));
+        if (playerAttack != null)
+        {
+            if (playerAttack.DamageUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.EnergyDamage, "エネルギー弾：威力強化", "エネルギー弾のダメージ +1"));
 
-        if (playerAttack.FireRateUpgradeLevel < 5)
-            available.Add(new UpgradeChoice(EnergyAttackUpgradeType.FireRate, "連射速度強化", "エネルギー弾の発射間隔を短縮"));
+            if (playerAttack.FireRateUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.EnergyFireRate, "エネルギー弾：連射速度強化", "発射間隔を短縮"));
 
-        if (playerAttack.ProjectileSpeedUpgradeLevel < 5)
-            available.Add(new UpgradeChoice(EnergyAttackUpgradeType.ProjectileSpeed, "弾速強化", "エネルギー弾が速くなる"));
+            if (playerAttack.ProjectileSpeedUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.EnergyProjectileSpeed, "エネルギー弾：弾速強化", "エネルギー弾が速くなる"));
 
-        if (playerAttack.AttackRangeUpgradeLevel < 5)
-            available.Add(new UpgradeChoice(EnergyAttackUpgradeType.AttackRange, "射程強化", "攻撃できる距離が伸びる"));
+            if (playerAttack.AttackRangeUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.EnergyAttackRange, "エネルギー弾：射程強化", "攻撃できる距離が伸びる"));
+        }
+
+        if (orbitingOrbAttack == null)
+        {
+            available.Add(new UpgradeChoice(UpgradeKind.UnlockOrbitingOrb, "新攻撃：回転オーブ", "プレイヤーの周囲を回るオーブで敵に接触ダメージを与える"));
+        }
+        else
+        {
+            if (orbitingOrbAttack.OrbCountUpgradeLevel < 3)
+                available.Add(new UpgradeChoice(UpgradeKind.OrbCount, "回転オーブ：数を増加", "回転するオーブを1個追加"));
+
+            if (orbitingOrbAttack.DamageUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.OrbDamage, "回転オーブ：威力強化", "接触ダメージ +1"));
+
+            if (orbitingOrbAttack.SpeedUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.OrbSpeed, "回転オーブ：回転速度強化", "オーブの回転速度が上昇"));
+        }
 
         int count = Mathf.Min(3, available.Count);
         for (int i = 0; i < count; i++)
@@ -118,38 +138,66 @@ public class PlayerExperience : MonoBehaviour
 
     private void SelectUpgrade(int index)
     {
-        if (!choosingUpgrade || index < 0 || index >= choices.Count || playerAttack == null)
+        if (!choosingUpgrade || index < 0 || index >= choices.Count) return;
+
+        UpgradeChoice choice = choices[index];
+        bool applied = false;
+
+        switch (choice.kind)
         {
+            case UpgradeKind.EnergyDamage:
+                applied = playerAttack != null && playerAttack.ApplyUpgrade(EnergyAttackUpgradeType.Damage);
+                break;
+            case UpgradeKind.EnergyFireRate:
+                applied = playerAttack != null && playerAttack.ApplyUpgrade(EnergyAttackUpgradeType.FireRate);
+                break;
+            case UpgradeKind.EnergyProjectileSpeed:
+                applied = playerAttack != null && playerAttack.ApplyUpgrade(EnergyAttackUpgradeType.ProjectileSpeed);
+                break;
+            case UpgradeKind.EnergyAttackRange:
+                applied = playerAttack != null && playerAttack.ApplyUpgrade(EnergyAttackUpgradeType.AttackRange);
+                break;
+            case UpgradeKind.UnlockOrbitingOrb:
+                if (orbitingOrbAttack == null)
+                {
+                    orbitingOrbAttack = gameObject.AddComponent<OrbitingOrbAttack>();
+                    applied = true;
+                }
+                break;
+            case UpgradeKind.OrbCount:
+                applied = orbitingOrbAttack != null && orbitingOrbAttack.ApplyOrbCountUpgrade();
+                break;
+            case UpgradeKind.OrbDamage:
+                applied = orbitingOrbAttack != null && orbitingOrbAttack.ApplyDamageUpgrade();
+                break;
+            case UpgradeKind.OrbSpeed:
+                applied = orbitingOrbAttack != null && orbitingOrbAttack.ApplySpeedUpgrade();
+                break;
+        }
+
+        if (!applied)
+        {
+            Debug.LogWarning("強化を適用できませんでした。");
             return;
         }
 
-        playerAttack.ApplyUpgrade(choices[index].type);
-        Debug.Log($"強化取得: {choices[index].title}");
-
+        Debug.Log($"強化取得: {choice.title}");
         choosingUpgrade = false;
         choices.Clear();
         Time.timeScale = previousTimeScale;
 
-        // 経験値を一度に多く取得していた場合、続けてレベルアップする。
-        if (currentExperience >= experienceToNextLevel)
-        {
-            BeginLevelUp();
-        }
+        if (currentExperience >= experienceToNextLevel) BeginLevelUp();
     }
 
     private void OnGUI()
     {
-        // 画面上部にレベルと経験値を表示する。
         GUI.Box(new Rect(Screen.width / 2f - 125f, 10f, 250f, 48f),
             $"LEVEL {level}    EXP {currentExperience} / {experienceToNextLevel}");
 
-        if (!choosingUpgrade)
-        {
-            return;
-        }
+        if (!choosingUpgrade) return;
 
-        float panelWidth = 390f;
-        float panelHeight = 250f;
+        float panelWidth = 430f;
+        float panelHeight = 285f;
         Rect panel = new Rect(
             (Screen.width - panelWidth) / 2f,
             (Screen.height - panelHeight) / 2f,
@@ -167,10 +215,7 @@ public class PlayerExperience : MonoBehaviour
         {
             UpgradeChoice choice = choices[i];
             GUILayout.BeginVertical(GUI.skin.box);
-            if (GUILayout.Button(choice.title, GUILayout.Height(38f)))
-            {
-                SelectUpgrade(i);
-            }
+            if (GUILayout.Button(choice.title, GUILayout.Height(38f))) SelectUpgrade(i);
             GUILayout.Label(choice.description);
             GUILayout.EndVertical();
         }
