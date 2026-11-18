@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// 1プレイの制限時間、撃破数、終了状態、リザルトを管理する。
 /// </summary>
+[DefaultExecutionOrder(10000)]
 public class GameSessionManager : MonoBehaviour
 {
     public static GameSessionManager Instance { get; private set; }
@@ -203,7 +204,7 @@ public class GameSessionManager : MonoBehaviour
 
         string status = playerHealth == null
             ? "プレイヤー待機中"
-            : $"経過 {Mathf.FloorToInt(ElapsedTime)}秒 / 残り {Mathf.CeilToInt(RemainingTime)}秒";
+            : $"経過 {Mathf.FloorToInt(ElapsedTime)}秒 / 残り {Mathf.CeilToInt(RemainingTime)}秒" + (Time.timeScale == 0f ? " [PAUSED]" : "");
         GUI.Label(new Rect(panel.x + 8f, panel.y + 22f, panelWidth - 16f, 20f), status);
 
         float buttonY = panel.y + 49f;
