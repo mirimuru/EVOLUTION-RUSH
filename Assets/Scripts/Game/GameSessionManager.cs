@@ -142,6 +142,7 @@ public class GameSessionManager : MonoBehaviour
         hasFinished = true;
         isRunning = false;
         cleared = wasCleared;
+        SoundManager.Play(cleared ? SoundManager.Effect.Victory : SoundManager.Effect.GameOver);
         Time.timeScale = 0f;
     }
 
