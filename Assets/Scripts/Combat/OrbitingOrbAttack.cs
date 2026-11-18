@@ -21,6 +21,9 @@ public class OrbitingOrbAttack : MonoBehaviour
     public int OrbCountUpgradeLevel { get; private set; }
     public int DamageUpgradeLevel { get; private set; }
     public int SpeedUpgradeLevel { get; private set; }
+    public bool BranchChosen { get; private set; }
+    public bool IsEvolved { get; private set; }
+    public int TotalUpgradeLevel => OrbCountUpgradeLevel + DamageUpgradeLevel + SpeedUpgradeLevel;
 
     private void Start()
     {
@@ -114,6 +117,24 @@ public class OrbitingOrbAttack : MonoBehaviour
 
         enemy.TakeDamage(damage);
         nextHitTimes[enemy] = Time.time + hitInterval;
+    }
+
+    public bool ApplyBranchUpgrade(bool addOrbs)
+    {
+        if (BranchChosen) return false;
+        if (addOrbs) { orbCount = Mathf.Min(8, orbCount + 2); RebuildOrbs(); }
+        else { damage += 3; orbitRadius += 0.4f; }
+        BranchChosen = true;
+        return true;
+    }
+
+    public bool ApplyEvolution()
+    {
+        if (!BranchChosen || IsEvolved) return false;
+        damage += 3; orbitRadius += 0.6f;
+        rotationSpeed = Mathf.Min(480f, rotationSpeed * 1.35f);
+        IsEvolved = true;
+        return true;
     }
 
     public bool ApplyOrbCountUpgrade()
