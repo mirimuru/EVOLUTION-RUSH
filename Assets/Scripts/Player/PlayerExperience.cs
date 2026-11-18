@@ -59,6 +59,13 @@ public class PlayerExperience : MonoBehaviour
     private readonly List<UpgradeChoice> choices = new List<UpgradeChoice>();
     private bool choosingUpgrade;
     private float previousTimeScale = 1f;
+    private Vector2 upgradeScrollPosition;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    [Header("Debug")]
+    [SerializeField] private bool showDebugPanel;
+    [SerializeField] private string debugExperienceInput = "10";
+    private string debugMessage = "";
 
     public int Level => level;
     public int CurrentExperience => currentExperience;
@@ -321,10 +328,14 @@ public class PlayerExperience : MonoBehaviour
         GUI.Box(new Rect(Screen.width / 2f - 125f, 10f, 250f, 48f),
             $"LEVEL {level}    EXP {currentExperience} / {experienceToNextLevel}");
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DrawDebugPanel();
+#endif
+
         if (!choosingUpgrade) return;
 
-        float panelWidth = 430f;
-        float panelHeight = 285f;
+        float panelWidth = Mathf.Min(500f, Screen.width - 30f);
+        float panelHeight = Mathf.Min(460f, Screen.height - 30f);
         Rect panel = new Rect(
             (Screen.width - panelWidth) / 2f,
             (Screen.height - panelHeight) / 2f,
@@ -333,22 +344,116 @@ public class PlayerExperience : MonoBehaviour
         );
 
         GUILayout.BeginArea(panel, GUI.skin.window);
-        GUILayout.Space(10);
-        GUILayout.Label($"LEVEL UP!  レベル {level}", GUI.skin.box);
         GUILayout.Space(8);
+        GUILayout.Label($"LEVEL UP!  レベル {level}", GUI.skin.box);
+        GUILayout.Space(6);
         GUILayout.Label("強化する項目を1つ選んでください。");
+
+        float scrollHeight = Mathf.Max(100f, panelHeight - 105f);
+        upgradeScrollPosition = GUILayout.BeginScrollView(
+            upgradeScrollPosition,
+            GUILayout.Height(scrollHeight)
+        );
 
         for (int i = 0; i < choices.Count; i++)
         {
             UpgradeChoice choice = choices[i];
             GUILayout.BeginVertical(GUI.skin.box);
-            if (GUILayout.Button(choice.title, GUILayout.Height(38f))) SelectUpgrade(i);
-            GUILayout.Label(choice.description);
+            if (GUILayout.Button(choice.title, GUILayout.Height(38f)))
+            {
+                SelectUpgrade(i);
+            }
+            GUILayout.Label(choice.description, GUILayout.ExpandHeight(false));
             GUILayout.EndVertical();
+        }
+
+        GUILayout.EndScrollView();
+        GUILayout.EndArea();
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private void DrawDebugPanel()
+    {
+        const float panelWidth = 260f;
+        const float panelHeight = 150f;
+
+        Rect toggleRect = new Rect(Screen.width - 105f, 10f, 95f, 28f);
+        if (GUI.Button(toggleRect, showDebugPanel ? "DEBUG ▼" : "DEBUG ▶"))
+        {
+            showDebugPanel = !showDebugPanel;
+        }
+
+        if (!showDebugPanel) return;
+
+        Rect panelRect = new Rect(
+            Screen.width - panelWidth - 10f,
+            43f,
+            panelWidth,
+            panelHeight
+        );
+
+        GUILayout.BeginArea(panelRect, GUI.skin.window);
+        GUILayout.Label("経験値デバッグ");
+        GUILayout.Label($"現在：{currentExperience} / 次のレベル：{experienceToNextLevel}");
+        GUILayout.Label("設定する経験値（0以上）");
+        debugExperienceInput = GUILayout.TextField(debugExperienceInput);
+
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("経験値を設定"))
+        {
+            SetDebugExperience();
+        }
+        if (GUILayout.Button("経験値を加算"))
+        {
+            AddDebugExperience();
+        }
+        GUILayout.EndHorizontal();
+
+        if (!string.IsNullOrEmpty(debugMessage))
+        {
+            GUILayout.Label(debugMessage);
         }
 
         GUILayout.EndArea();
     }
+
+    private bool TryGetDebugExperience(out int value)
+    {
+        if (int.TryParse(debugExperienceInput, out value) && value >= 0)
+        {
+            return true;
+        }
+
+        debugMessage = "0以上の整数を入力してください。";
+        return false;
+    }
+
+    private void SetDebugExperience()
+    {
+        if (!TryGetDebugExperience(out int value)) return;
+
+        currentExperience = value;
+        debugMessage = $"経験値を {value} に設定しました。";
+
+        if (!choosingUpgrade && currentExperience >= experienceToNextLevel)
+        {
+            BeginLevelUp();
+        }
+    }
+
+    private void AddDebugExperience()
+    {
+        if (!TryGetDebugExperience(out int value)) return;
+        if (value == 0)
+        {
+            debugMessage = "加算する経験値を1以上にしてください。";
+            return;
+        }
+
+        AddExperience(value);
+        debugMessage = $"経験値を {value} 加算しました。";
+    }
+#endif
 
     private void OnDisable()
     {
