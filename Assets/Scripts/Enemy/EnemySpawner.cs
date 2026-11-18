@@ -16,7 +16,12 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float spawnMaxDistance = 12f;
     [SerializeField] private int maxEnemies = 12;
 
+    [Header("Boss Settings")]
+    [SerializeField] private int bossHealth = 120;
+    [SerializeField] private float bossSpawnDistance = 15f;
+
     private float spawnTimer;
+    private bool bossSpawned;
 
     private void Update()
     {
@@ -25,18 +30,23 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
+        GameSessionManager session = GameSessionManager.Instance;
+        if (session != null && !session.IsRunning) return;
+
+        float progress = session != null ? session.Progress : 0f;
+        if (!bossSpawned && session != null && session.BossPhaseStarted)
+        {
+            SpawnBoss();
+            bossSpawned = true;
+        }
+
         spawnTimer += Time.deltaTime;
-
-        float intervalMultiplier = GameSettings.Instance != null
-            ? GameSettings.Instance.SpawnIntervalMultiplier
-            : 1f;
-
-        float countMultiplier = GameSettings.Instance != null
-            ? GameSettings.Instance.EnemyCountMultiplier
-            : 1f;
-
-        float currentSpawnInterval = Mathf.Max(0.1f, spawnInterval * intervalMultiplier);
-        int currentMaxEnemies = Mathf.Max(1, Mathf.CeilToInt(maxEnemies * countMultiplier));
+        float intervalMultiplier = GameSettings.Instance != null ? GameSettings.Instance.SpawnIntervalMultiplier : 1f;
+        float countMultiplier = GameSettings.Instance != null ? GameSettings.Instance.EnemyCountMultiplier : 1f;
+        float timeSpawnMultiplier = Mathf.Lerp(1f, 0.55f, progress);
+        float timeCountMultiplier = Mathf.Lerp(1f, 1.8f, progress);
+        float currentSpawnInterval = Mathf.Max(0.25f, spawnInterval * intervalMultiplier * timeSpawnMultiplier);
+        int currentMaxEnemies = Mathf.Max(1, Mathf.CeilToInt(maxEnemies * countMultiplier * timeCountMultiplier));
 
         if (spawnTimer >= currentSpawnInterval)
         {
@@ -44,7 +54,7 @@ public class EnemySpawner : MonoBehaviour
 
             if (FindObjectsByType<EnemyAI>(FindObjectsSortMode.None).Length < currentMaxEnemies)
             {
-                SpawnEnemy();
+                SpawnEnemy(progress);
             }
         }
     }
@@ -52,9 +62,33 @@ public class EnemySpawner : MonoBehaviour
     public void ResetSpawner()
     {
         spawnTimer = 0f;
+        bossSpawned = false;
     }
 
-    private void SpawnEnemy()
+    private void SpawnBoss()
+    {
+        Vector2 direction = Random.insideUnitCircle.normalized;
+        if (direction.sqrMagnitude < 0.01f) direction = Vector2.right;
+        Vector3 position = player.position + new Vector3(direction.x * bossSpawnDistance, 1.5f, direction.y * bossSpawnDistance);
+
+        GameObject boss = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        boss.name = "EVOLUTION RUSH BOSS";
+        boss.transform.position = position;
+        boss.transform.localScale = new Vector3(2.4f, 1.5f, 2.4f);
+        Renderer renderer = boss.GetComponent<Renderer>();
+        if (renderer != null) renderer.material.color = new Color(0.55f, 0.12f, 0.85f);
+
+        Rigidbody body = boss.AddComponent<Rigidbody>();
+        body.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        body.interpolation = RigidbodyInterpolation.Interpolate;
+
+        EnemyHealth health = boss.AddComponent<EnemyHealth>();
+        health.SetMaxHealth(bossHealth);
+        BossAI bossAI = boss.AddComponent<BossAI>();
+        bossAI.SetTarget(player);
+    }
+
+    private void SpawnEnemy(float progress)
     {
         Vector2 randomDirection = Random.insideUnitCircle.normalized;
 
@@ -76,6 +110,13 @@ public class EnemySpawner : MonoBehaviour
         if (enemyAI != null)
         {
             enemyAI.SetTarget(player);
+            enemyAI.SetRunSpeedMultiplier(Mathf.Lerp(1f, 1.35f, progress));
+        }
+
+        EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+        if (enemyHealth != null)
+        {
+            enemyHealth.ApplyRunHealthMultiplier(Mathf.Lerp(1f, 1.8f, progress));
         }
     }
 }
