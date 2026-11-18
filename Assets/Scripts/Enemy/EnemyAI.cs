@@ -7,9 +7,13 @@ using UnityEngine;
 public class EnemyAI : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 2.5f;
+    [SerializeField] private float contactAttackRange = 1.25f;
+    [SerializeField] private int contactDamage = 10;
+    [SerializeField] private float contactAttackInterval = 1f;
 
     private Rigidbody rb;
     private Transform target;
+    private float nextContactAttackTime;
 
     private void Awake()
     {
@@ -35,6 +39,25 @@ public class EnemyAI : MonoBehaviour
         if (direction.sqrMagnitude < 0.01f)
         {
             rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
+        }
+
+        float distanceSqr = direction.sqrMagnitude;
+        if (distanceSqr <= contactAttackRange * contactAttackRange)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+
+            if (Time.time >= nextContactAttackTime)
+            {
+                PlayerHealth playerHealth = target.GetComponent<PlayerHealth>();
+                if (playerHealth != null)
+                {
+                    playerHealth.TakeDamage(contactDamage);
+                }
+
+                nextContactAttackTime = Time.time + contactAttackInterval;
+            }
+
             return;
         }
 
