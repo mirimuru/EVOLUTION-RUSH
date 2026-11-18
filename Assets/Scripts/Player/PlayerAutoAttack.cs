@@ -258,6 +258,7 @@ public class PlayerAutoAttack : MonoBehaviour
         }
 
         projectile.Initialize(direction, projectileSpeed, attackDamage, projectileLifetime);
+        SoundManager.Play(SoundManager.Effect.PlayerShoot);
     }
 
     private Vector3 GetDirectionTo(Vector3 targetPosition)
