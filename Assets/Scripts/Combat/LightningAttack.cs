@@ -56,6 +56,7 @@ public class LightningAttack : MonoBehaviour
             current = next;
         }
 
+        SoundManager.Play(SoundManager.Effect.Lightning);
         for (int i = 0; i < targets.Count; i++)
         {
             if (targets[i] != null) targets[i].TakeDamage(damage);
