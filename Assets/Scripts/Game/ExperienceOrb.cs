@@ -38,6 +38,7 @@ public class ExperienceOrb : MonoBehaviour
             return;
         }
 
+        SoundManager.Play(SoundManager.Effect.ExperiencePickup);
         player.AddExperience(experienceAmount);
         Destroy(gameObject);
     }
