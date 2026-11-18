@@ -6,6 +6,7 @@ using UnityEngine;
 /// </summary>
 public class EnemyHealth : MonoBehaviour
 {
+    public static event System.Action EnemyDefeated;
     [Header("Health Settings")]
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private int experienceValue = 1;
@@ -129,6 +130,8 @@ public class EnemyHealth : MonoBehaviour
 
     private void Die()
     {
+        EnemyDefeated?.Invoke();
+
         // 敵を倒した位置に経験値オーブを出現させる。
         ExperienceOrb.Create(transform.position + Vector3.up * 0.5f, experienceValue);
         Destroy(gameObject);
