@@ -403,7 +403,12 @@ public class PlayerExperience : MonoBehaviour
                     bool energyOk = playerAttack.ApplyEvolution();
                     bool lightningOk = lightningAttack.ApplyEvolution();
                     applied = energyOk && lightningOk;
-                    if (applied) evolutionCores--;
+                    if (applied)
+                    {
+                        playerAttack.ApplyPlasmaFusionBonus();
+                        lightningAttack.ApplyPlasmaFusionBonus();
+                        evolutionCores--;
+                    }
                 }
                 break;
         }
