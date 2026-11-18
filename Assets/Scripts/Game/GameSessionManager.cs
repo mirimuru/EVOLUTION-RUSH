@@ -117,8 +117,14 @@ public class GameSessionManager : MonoBehaviour
     /// <summary>デバッグ用。ゲーム内タイマーを指定秒数だけ進める。</summary>
     public void DebugAdvanceTime(float seconds)
     {
-        if (!IsRunning || seconds <= 0f) return;
+        if (hasFinished || seconds <= 0f) return;
 
+        // レベルアップ選択中はTime.timeScaleが0になるため、
+        // Updateに依存せずデバッグ操作から直接経過時間を進める。
+        FindPlayerReferences();
+        if (playerHealth == null) return;
+
+        isRunning = true;
         elapsedTime = Mathf.Min(runDuration, elapsedTime + seconds);
         if (elapsedTime >= runDuration)
         {
@@ -140,6 +146,10 @@ public class GameSessionManager : MonoBehaviour
 
     private void OnGUI()
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        DrawDebugTimerPanel();
+#endif
+
         if (!hasFinished)
         {
             if (playerHealth != null)
@@ -179,6 +189,33 @@ public class GameSessionManager : MonoBehaviour
 
         GUILayout.EndArea();
     }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    /// <summary>経験値パネルと独立したタイマーデバッグ操作。</summary>
+    private void DrawDebugTimerPanel()
+    {
+        if (hasFinished) return;
+
+        const float panelWidth = 190f;
+        const float panelHeight = 88f;
+        Rect panel = new Rect(10f, Screen.height - panelHeight - 10f, panelWidth, panelHeight);
+        GUI.Box(panel, "DEBUG TIME");
+
+        string status = playerHealth == null
+            ? "プレイヤー待機中"
+            : $"経過 {Mathf.FloorToInt(ElapsedTime)}秒 / 残り {Mathf.CeilToInt(RemainingTime)}秒";
+        GUI.Label(new Rect(panel.x + 8f, panel.y + 22f, panelWidth - 16f, 20f), status);
+
+        float buttonY = panel.y + 49f;
+        float buttonWidth = (panelWidth - 24f) / 3f;
+        if (GUI.Button(new Rect(panel.x + 6f, buttonY, buttonWidth, 28f), "+10秒"))
+            DebugAdvanceTime(10f);
+        if (GUI.Button(new Rect(panel.x + 9f + buttonWidth, buttonY, buttonWidth, 28f), "+30秒"))
+            DebugAdvanceTime(30f);
+        if (GUI.Button(new Rect(panel.x + 12f + buttonWidth * 2f, buttonY, buttonWidth, 28f), "+60秒"))
+            DebugAdvanceTime(60f);
+    }
+#endif
 
     private GUIStyle MakeCenteredStyle(int fontSize)
     {
