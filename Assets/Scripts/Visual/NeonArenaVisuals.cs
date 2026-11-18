@@ -12,7 +12,6 @@ public class NeonArenaVisuals : MonoBehaviour
 
     private readonly List<Material> materials = new List<Material>();
     private readonly List<Renderer> pulseRenderers = new List<Renderer>();
-    private Material ringMaterial;
     private float pulseTime;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -48,7 +47,6 @@ public class NeonArenaVisuals : MonoBehaviour
         Material floor = CreateMaterial(new Color(0.012f, 0.022f, 0.055f), Color.black, 0f);
         Material cyan = CreateMaterial(new Color(0.02f, 0.45f, 0.75f), new Color(0.02f, 0.55f, 1f), 2.2f);
         Material violet = CreateMaterial(new Color(0.28f, 0.035f, 0.48f), new Color(0.5f, 0.025f, 1f), 2.4f);
-        ringMaterial = cyan;
 
         GameObject disk = new GameObject("NeonArenaFloor");
         disk.transform.SetParent(transform, false);
@@ -137,8 +135,8 @@ public class NeonArenaVisuals : MonoBehaviour
             vertices[i + 1] = new Vector3(Mathf.Cos(angle) * radius, -0.035f, Mathf.Sin(angle) * radius);
             int next = (i + 1) % segments;
             triangles[i * 3] = 0;
-            triangles[i * 3 + 1] = i + 1;
-            triangles[i * 3 + 2] = next + 1;
+            triangles[i * 3 + 1] = next + 1;
+            triangles[i * 3 + 2] = i + 1;
         }
 
         mesh.vertices = vertices;
