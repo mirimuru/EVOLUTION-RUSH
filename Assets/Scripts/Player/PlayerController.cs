@@ -12,10 +12,27 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody rb;
     private Vector2 moveInput;
+    private Vector3 startPosition;
+    private Quaternion startRotation;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        startPosition = transform.position;
+        startRotation = transform.rotation;
+
+        // PlayerHealthをシーンへの手動追加なしで用意する。
+        if (GetComponent<PlayerHealth>() == null)
+        {
+            gameObject.AddComponent<PlayerHealth>();
+        }
+    }
+
+    public void ResetPlayerPosition()
+    {
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        transform.SetPositionAndRotation(startPosition, startRotation);
     }
 
     private void Update()
