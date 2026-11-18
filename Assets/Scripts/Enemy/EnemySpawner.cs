@@ -49,6 +49,11 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
+    public void ResetSpawner()
+    {
+        spawnTimer = 0f;
+    }
+
     private void SpawnEnemy()
     {
         Vector2 randomDirection = Random.insideUnitCircle.normalized;
