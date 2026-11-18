@@ -23,7 +23,12 @@ public class PlayerExperience : MonoBehaviour
         UnlockLightning,
         LightningDamage,
         LightningChain,
-        LightningCooldown
+        LightningCooldown,
+        UnlockMeteor,
+        MeteorCount,
+        MeteorRadius,
+        MeteorDamage,
+        MeteorCooldown
     }
 
     private class UpgradeChoice
@@ -50,6 +55,7 @@ public class PlayerExperience : MonoBehaviour
     private OrbitingOrbAttack orbitingOrbAttack;
     private ShockwaveAttack shockwaveAttack;
     private LightningAttack lightningAttack;
+    private MeteorAttack meteorAttack;
     private readonly List<UpgradeChoice> choices = new List<UpgradeChoice>();
     private bool choosingUpgrade;
     private float previousTimeScale = 1f;
@@ -71,6 +77,9 @@ public class PlayerExperience : MonoBehaviour
 
         lightningAttack = GetComponent<LightningAttack>();
         if (lightningAttack == null) lightningAttack = GetComponentInChildren<LightningAttack>();
+
+        meteorAttack = GetComponent<MeteorAttack>();
+        if (meteorAttack == null) meteorAttack = GetComponentInChildren<MeteorAttack>();
     }
 
     public void AddExperience(int amount)
@@ -175,6 +184,25 @@ public class PlayerExperience : MonoBehaviour
                 available.Add(new UpgradeChoice(UpgradeKind.LightningCooldown, "雷撃：発動間隔短縮", "雷撃がより短い間隔で発生"));
         }
 
+        if (meteorAttack == null)
+        {
+            available.Add(new UpgradeChoice(UpgradeKind.UnlockMeteor, "新攻撃：メテオ", "敵が密集した場所に隕石を落とし、範囲ダメージを与える"));
+        }
+        else
+        {
+            if (meteorAttack.CountUpgradeLevel < 3)
+                available.Add(new UpgradeChoice(UpgradeKind.MeteorCount, "メテオ：隕石数増加", "一度に落とす隕石を1個追加"));
+
+            if (meteorAttack.RadiusUpgradeLevel < 4)
+                available.Add(new UpgradeChoice(UpgradeKind.MeteorRadius, "メテオ：爆発範囲拡大", "爆発の範囲が広がる"));
+
+            if (meteorAttack.DamageUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.MeteorDamage, "メテオ：威力強化", "メテオのダメージ +2"));
+
+            if (meteorAttack.CooldownUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.MeteorCooldown, "メテオ：発動間隔短縮", "メテオがより短い間隔で落ちる"));
+        }
+
         int count = Mathf.Min(3, available.Count);
         for (int i = 0; i < count; i++)
         {
@@ -252,6 +280,25 @@ public class PlayerExperience : MonoBehaviour
                 break;
             case UpgradeKind.LightningCooldown:
                 applied = lightningAttack != null && lightningAttack.ApplyCooldownUpgrade();
+                break;
+            case UpgradeKind.UnlockMeteor:
+                if (meteorAttack == null)
+                {
+                    meteorAttack = gameObject.AddComponent<MeteorAttack>();
+                    applied = true;
+                }
+                break;
+            case UpgradeKind.MeteorCount:
+                applied = meteorAttack != null && meteorAttack.ApplyCountUpgrade();
+                break;
+            case UpgradeKind.MeteorRadius:
+                applied = meteorAttack != null && meteorAttack.ApplyRadiusUpgrade();
+                break;
+            case UpgradeKind.MeteorDamage:
+                applied = meteorAttack != null && meteorAttack.ApplyDamageUpgrade();
+                break;
+            case UpgradeKind.MeteorCooldown:
+                applied = meteorAttack != null && meteorAttack.ApplyCooldownUpgrade();
                 break;
         }
 
