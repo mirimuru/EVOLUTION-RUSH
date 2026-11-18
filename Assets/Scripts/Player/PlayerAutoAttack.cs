@@ -129,6 +129,13 @@ public class PlayerAutoAttack : MonoBehaviour
         return true;
     }
 
+    public void ApplyPlasmaFusionBonus()
+    {
+        if (!evolved) return;
+        attackDamage += 4;
+        attackInterval = Mathf.Max(0.08f, attackInterval * 0.9f);
+    }
+
     private void Update()
     {
         GameSettings.OperationDifficulty mode = GameSettings.Instance != null
