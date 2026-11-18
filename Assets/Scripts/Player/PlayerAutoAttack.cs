@@ -26,6 +26,8 @@ public class PlayerAutoAttack : MonoBehaviour
     private float initialAttackRange;
     private float initialAttackInterval;
     private int initialAttackDamage;
+    private bool branchChosen;
+    private bool evolved;
 
     [Header("Upgrade Levels")]
     [SerializeField] private int damageUpgradeLevel;
@@ -50,6 +52,9 @@ public class PlayerAutoAttack : MonoBehaviour
     public float CurrentAttackInterval => attackInterval;
     public float CurrentProjectileSpeed => projectileSpeed;
     public float CurrentAttackRange => attackRange;
+    public bool BranchChosen => branchChosen;
+    public bool IsEvolved => evolved;
+    public int TotalUpgradeLevel => damageUpgradeLevel + fireRateUpgradeLevel + projectileSpeedUpgradeLevel + attackRangeUpgradeLevel;
 
     /// <summary>
     /// レベルアップなどから呼び出し、エネルギー弾を強化する。
@@ -100,7 +105,28 @@ public class PlayerAutoAttack : MonoBehaviour
         fireRateUpgradeLevel = 0;
         projectileSpeedUpgradeLevel = 0;
         attackRangeUpgradeLevel = 0;
+        branchChosen = false;
+        evolved = false;
         nextAttackTime = 0f;
+    }
+
+    public bool ApplyBranchUpgrade(bool rapidFire)
+    {
+        if (branchChosen) return false;
+        if (rapidFire) attackInterval = Mathf.Max(0.12f, attackInterval * 0.72f);
+        else { attackDamage += 3; projectileSpeed = Mathf.Min(45f, projectileSpeed * 1.1f); }
+        branchChosen = true;
+        return true;
+    }
+
+    public bool ApplyEvolution()
+    {
+        if (!branchChosen || evolved) return false;
+        attackDamage += 3;
+        projectileSpeed = Mathf.Min(50f, projectileSpeed * 1.25f);
+        attackInterval = Mathf.Max(0.1f, attackInterval * 0.85f);
+        evolved = true;
+        return true;
     }
 
     private void Update()
