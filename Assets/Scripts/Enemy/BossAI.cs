@@ -94,6 +94,7 @@ public class BossAI : MonoBehaviour
             yield return null;
         }
 
+        SoundManager.Play(SoundManager.Effect.BossAttack);
         Collider[] hits = Physics.OverlapSphere(center, attackRadius);
         foreach (Collider hit in hits)
         {
