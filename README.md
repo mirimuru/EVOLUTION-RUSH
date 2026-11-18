@@ -139,7 +139,7 @@
 | `Assets/Scripts/Combat/LightningAttack.cs` | 雷撃・連鎖対象の選択・雷エフェクト |
 | `Assets/Scripts/Combat/MeteorAttack.cs` | メテオの狙い（敵の密集地点）・着弾予告・落下・爆発範囲ダメージ・演出 |
 | `Assets/Scripts/Game/ExperienceOrb.cs` | 経験値オーブの生成・回収 |
-| `Assets/Scripts/Game/GameSessionManager.cs` | 180秒タイマー、進行度、敵撃破数、ボス撃破クリア、ゲームオーバー、リザルト、再挑戦 |
+| `Assets/Scripts/Game/GameSessionManager.cs` | 180秒タイマー、進行度、敵撃破数、ボス撃破クリア、ゲームオーバー、リザルト、再挑戦、デバッグ用時間加算 |
 | `Assets/Scripts/Game/GameSettings.cs` | 操作難易度・ゲーム難易度の管理 |
 
 ### 実装上の注意
