@@ -90,6 +90,34 @@ public class PlayerExperience : MonoBehaviour
         if (meteorAttack == null) meteorAttack = GetComponentInChildren<MeteorAttack>();
     }
 
+    public void ResetForNewRun()
+    {
+        if (choosingUpgrade)
+        {
+            Time.timeScale = previousTimeScale;
+            choosingUpgrade = false;
+        }
+
+        level = 1;
+        currentExperience = 0;
+        experienceToNextLevel = 5;
+        choices.Clear();
+        upgradeScrollPosition = Vector2.zero;
+
+        if (playerAttack != null)
+            playerAttack.ResetUpgrades();
+
+        if (orbitingOrbAttack != null) Destroy(orbitingOrbAttack);
+        if (shockwaveAttack != null) Destroy(shockwaveAttack);
+        if (lightningAttack != null) Destroy(lightningAttack);
+        if (meteorAttack != null) Destroy(meteorAttack);
+
+        orbitingOrbAttack = null;
+        shockwaveAttack = null;
+        lightningAttack = null;
+        meteorAttack = null;
+    }
+
     public void AddExperience(int amount)
     {
         if (amount <= 0) return;
