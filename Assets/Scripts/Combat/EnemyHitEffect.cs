@@ -17,9 +17,9 @@ public static class EnemyHitEffect
         main.loop = false;
         main.playOnAwake = false;
         main.startLifetime = 0.22f;
-        main.startSpeed = 2.2f;
-        main.startSize = 0.18f;
-        main.startColor = new Color(0.35f, 0.85f, 1f, 1f);
+        main.startSpeed = 3.2f;
+        main.startSize = 0.22f;
+        main.startColor = new Color(0.55f, 0.95f, 1f, 1f);
         main.maxParticles = 12;
         main.simulationSpace = ParticleSystemSimulationSpace.World;
 
