@@ -18,6 +18,9 @@ public class ShockwaveAttack : MonoBehaviour
     public int RadiusUpgradeLevel { get; private set; }
     public int DamageUpgradeLevel { get; private set; }
     public int CooldownUpgradeLevel { get; private set; }
+    public bool BranchChosen { get; private set; }
+    public bool IsEvolved { get; private set; }
+    public int TotalUpgradeLevel => RadiusUpgradeLevel + DamageUpgradeLevel + CooldownUpgradeLevel;
 
     private void Start()
     {
@@ -93,6 +96,24 @@ public class ShockwaveAttack : MonoBehaviour
         }
 
         Destroy(effect);
+    }
+
+    public bool ApplyBranchUpgrade(bool wide)
+    {
+        if (BranchChosen) return false;
+        if (wide) radius += 2f;
+        else cooldown = Mathf.Max(0.65f, cooldown * 0.65f);
+        BranchChosen = true;
+        return true;
+    }
+
+    public bool ApplyEvolution()
+    {
+        if (!BranchChosen || IsEvolved) return false;
+        radius += 1.5f; damage += 3;
+        cooldown = Mathf.Max(0.5f, cooldown * 0.8f);
+        IsEvolved = true;
+        return true;
     }
 
     public bool ApplyRadiusUpgrade()
