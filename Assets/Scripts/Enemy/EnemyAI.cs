@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class EnemyAI : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 2.5f;
+    [SerializeField] private float moveSpeed = 5.4f;
     [SerializeField] private float contactAttackRange = 1.25f;
     [SerializeField] private int contactDamage = 10;
     [SerializeField] private float contactAttackInterval = 1f;
@@ -68,6 +68,13 @@ public class EnemyAI : MonoBehaviour
             : 1f;
 
         float currentMoveSpeed = moveSpeed * difficultyMultiplier * runSpeedMultiplier;
+
+        // プレイヤーより少し遅い速度に制限し、逃げ切れる余地を確保する。
+        PlayerController playerController = target.GetComponent<PlayerController>();
+        if (playerController != null)
+        {
+            currentMoveSpeed = Mathf.Min(currentMoveSpeed, playerController.MoveSpeed * 0.9f);
+        }
 
         rb.linearVelocity = new Vector3(
             direction.x * currentMoveSpeed,
