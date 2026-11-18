@@ -251,12 +251,6 @@ public class GameSessionManager : MonoBehaviour
             if (enemy != null) Destroy(enemy.gameObject);
         }
 
-        ExperienceOrb[] orbs = FindObjectsByType<ExperienceOrb>(FindObjectsSortMode.None);
-        foreach (ExperienceOrb orb in orbs)
-        {
-            if (orb != null) Destroy(orb.gameObject);
-        }
-
         EnergyProjectile[] projectiles = FindObjectsByType<EnergyProjectile>(FindObjectsSortMode.None);
         foreach (EnergyProjectile projectile in projectiles)
         {
