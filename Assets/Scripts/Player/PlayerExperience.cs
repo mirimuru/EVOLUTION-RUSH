@@ -135,7 +135,10 @@ public class PlayerExperience : MonoBehaviour
 
         Debug.Log($"経験値 +{amount} ({currentExperience}/{experienceToNextLevel})");
 
-        if (!choosingUpgrade && currentExperience >= experienceToNextLevel)
+        bool runHasFinished = GameSessionManager.Instance != null &&
+            GameSessionManager.Instance.HasFinished;
+
+        if (!choosingUpgrade && !runHasFinished && currentExperience >= experienceToNextLevel)
         {
             BeginLevelUp();
         }
