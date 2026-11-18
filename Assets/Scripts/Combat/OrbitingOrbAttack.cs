@@ -86,7 +86,7 @@ public class OrbitingOrbAttack : MonoBehaviour
             body.useGravity = false;
             body.isKinematic = true;
 
-            OrbHitbox hitbox = orb.AddComponent<OrbHitbox>();
+            OrbitingOrbHitbox hitbox = orb.AddComponent<OrbitingOrbHitbox>();
             hitbox.Initialize(this);
 
             orbs.Add(orb);
@@ -141,23 +141,4 @@ public class OrbitingOrbAttack : MonoBehaviour
         return true;
     }
 
-    private class OrbHitbox : MonoBehaviour
-    {
-        private OrbitingOrbAttack owner;
-
-        public void Initialize(OrbitingOrbAttack attack)
-        {
-            owner = attack;
-        }
-
-        private void OnTriggerEnter(Collider other)
-        {
-            if (owner != null) owner.HandleOrbContact(other);
-        }
-
-        private void OnTriggerStay(Collider other)
-        {
-            if (owner != null) owner.HandleOrbContact(other);
-        }
-    }
 }
