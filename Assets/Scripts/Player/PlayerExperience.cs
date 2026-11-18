@@ -15,7 +15,11 @@ public class PlayerExperience : MonoBehaviour
         UnlockOrbitingOrb,
         OrbCount,
         OrbDamage,
-        OrbSpeed
+        OrbSpeed,
+        UnlockShockwave,
+        ShockwaveRadius,
+        ShockwaveDamage,
+        ShockwaveCooldown
     }
 
     private class UpgradeChoice
@@ -40,6 +44,7 @@ public class PlayerExperience : MonoBehaviour
 
     private PlayerAutoAttack playerAttack;
     private OrbitingOrbAttack orbitingOrbAttack;
+    private ShockwaveAttack shockwaveAttack;
     private readonly List<UpgradeChoice> choices = new List<UpgradeChoice>();
     private bool choosingUpgrade;
     private float previousTimeScale = 1f;
@@ -55,6 +60,9 @@ public class PlayerExperience : MonoBehaviour
 
         orbitingOrbAttack = GetComponent<OrbitingOrbAttack>();
         if (orbitingOrbAttack == null) orbitingOrbAttack = GetComponentInChildren<OrbitingOrbAttack>();
+
+        shockwaveAttack = GetComponent<ShockwaveAttack>();
+        if (shockwaveAttack == null) shockwaveAttack = GetComponentInChildren<ShockwaveAttack>();
     }
 
     public void AddExperience(int amount)
@@ -127,6 +135,22 @@ public class PlayerExperience : MonoBehaviour
                 available.Add(new UpgradeChoice(UpgradeKind.OrbSpeed, "回転オーブ：回転速度強化", "オーブの回転速度が上昇"));
         }
 
+        if (shockwaveAttack == null)
+        {
+            available.Add(new UpgradeChoice(UpgradeKind.UnlockShockwave, "新攻撃：衝撃波", "一定間隔で周囲の敵に範囲ダメージを与える"));
+        }
+        else
+        {
+            if (shockwaveAttack.RadiusUpgradeLevel < 4)
+                available.Add(new UpgradeChoice(UpgradeKind.ShockwaveRadius, "衝撃波：範囲拡大", "衝撃波が届く距離を拡大"));
+
+            if (shockwaveAttack.DamageUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.ShockwaveDamage, "衝撃波：威力強化", "衝撃波のダメージ +1"));
+
+            if (shockwaveAttack.CooldownUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.ShockwaveCooldown, "衝撃波：発動間隔短縮", "衝撃波がより短い間隔で発生"));
+        }
+
         int count = Mathf.Min(3, available.Count);
         for (int i = 0; i < count; i++)
         {
@@ -172,6 +196,22 @@ public class PlayerExperience : MonoBehaviour
                 break;
             case UpgradeKind.OrbSpeed:
                 applied = orbitingOrbAttack != null && orbitingOrbAttack.ApplySpeedUpgrade();
+                break;
+            case UpgradeKind.UnlockShockwave:
+                if (shockwaveAttack == null)
+                {
+                    shockwaveAttack = gameObject.AddComponent<ShockwaveAttack>();
+                    applied = true;
+                }
+                break;
+            case UpgradeKind.ShockwaveRadius:
+                applied = shockwaveAttack != null && shockwaveAttack.ApplyRadiusUpgrade();
+                break;
+            case UpgradeKind.ShockwaveDamage:
+                applied = shockwaveAttack != null && shockwaveAttack.ApplyDamageUpgrade();
+                break;
+            case UpgradeKind.ShockwaveCooldown:
+                applied = shockwaveAttack != null && shockwaveAttack.ApplyCooldownUpgrade();
                 break;
         }
 
