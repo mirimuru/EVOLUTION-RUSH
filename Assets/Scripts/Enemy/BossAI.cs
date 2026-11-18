@@ -49,6 +49,27 @@ public class BossAI : MonoBehaviour
         }
     }
 
+    private void OnGUI()
+    {
+        EnemyHealth health = GetComponent<EnemyHealth>();
+        Camera camera = Camera.main;
+        if (health == null || camera == null || health.CurrentHealth <= 0) return;
+
+        Vector3 screen = camera.WorldToScreenPoint(transform.position + Vector3.up * 3.2f);
+        if (screen.z <= 0f) return;
+
+        float width = 150f;
+        float height = 14f;
+        Rect background = new Rect(screen.x - width * 0.5f, Screen.height - screen.y, width, height);
+        GUI.color = Color.black;
+        GUI.Box(background, GUIContent.none);
+        GUI.color = new Color(0.75f, 0.08f, 0.95f);
+        float ratio = Mathf.Clamp01(health.CurrentHealth / (float)health.MaxHealth);
+        GUI.Box(new Rect(background.x + 2f, background.y + 2f, (width - 4f) * ratio, height - 4f), GUIContent.none);
+        GUI.color = Color.white;
+        GUI.Label(new Rect(background.x, background.y - 22f, width, 20f), "BOSS  " + health.CurrentHealth + " / " + health.MaxHealth);
+    }
+
     private IEnumerator GroundSlam()
     {
         isAttacking = true;
