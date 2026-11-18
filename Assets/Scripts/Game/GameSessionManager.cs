@@ -154,7 +154,7 @@ public class GameSessionManager : MonoBehaviour
         GUILayout.Space(20f);
         GUILayout.Label($"生存時間：{FormatTime(elapsedTime)}", MakeCenteredStyle(18));
         GUILayout.Label($"敵撃破数：{defeatedEnemyCount}", MakeCenteredStyle(18));
-        GUILayout.Label($"到達レベル：{playerExperience != null ? playerExperience.Level : 1}", MakeCenteredStyle(18));
+        GUILayout.Label($"到達レベル：{(playerExperience != null ? playerExperience.Level : 1)}", MakeCenteredStyle(18));
         GUILayout.Space(24f);
 
         if (GUILayout.Button("もう一度プレイ", GUILayout.Height(48f)))
