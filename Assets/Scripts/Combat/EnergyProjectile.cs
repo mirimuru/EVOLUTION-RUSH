@@ -88,6 +88,7 @@ public class EnergyProjectile : MonoBehaviour
 
         hasHit = true;
         enemy.TakeDamage(damage);
+        EnemyHitEffect.Create(other.ClosestPoint(transform.position));
         Destroy(gameObject);
     }
 }
