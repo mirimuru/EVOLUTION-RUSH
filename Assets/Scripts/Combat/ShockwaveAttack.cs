@@ -37,6 +37,7 @@ public class ShockwaveAttack : MonoBehaviour
 
     private void PerformShockwave()
     {
+        SoundManager.Play(SoundManager.Effect.Shockwave);
         Collider[] hits = Physics.OverlapSphere(transform.position, radius);
         HashSet<EnemyHealth> damagedEnemies = new HashSet<EnemyHealth>();
 
