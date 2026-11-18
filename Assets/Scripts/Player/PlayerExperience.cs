@@ -94,7 +94,11 @@ public class PlayerExperience : MonoBehaviour
     {
         if (amount <= 0) return;
 
-        currentExperience += amount;
+        // デバッグ入力などで大きな値が加算されても整数オーバーフローしないようにする。
+        currentExperience = amount > int.MaxValue - currentExperience
+            ? int.MaxValue
+            : currentExperience + amount;
+
         Debug.Log($"経験値 +{amount} ({currentExperience}/{experienceToNextLevel})");
 
         if (!choosingUpgrade && currentExperience >= experienceToNextLevel)
@@ -376,7 +380,7 @@ public class PlayerExperience : MonoBehaviour
     private void DrawDebugPanel()
     {
         const float panelWidth = 260f;
-        const float panelHeight = 150f;
+        const float panelHeight = 175f;
 
         Rect toggleRect = new Rect(Screen.width - 105f, 10f, 95f, 28f);
         if (GUI.Button(toggleRect, showDebugPanel ? "DEBUG ▼" : "DEBUG ▶"))
