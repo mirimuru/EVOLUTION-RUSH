@@ -89,6 +89,7 @@ public class EnemySpawner : MonoBehaviour
         health.SetMaxHealth(bossHealth);
         BossAI bossAI = boss.AddComponent<BossAI>();
         bossAI.SetTarget(player);
+        SoundManager.Play(SoundManager.Effect.BossSpawn);
     }
 
     private void SpawnEnemy(float progress)
