@@ -93,9 +93,12 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            SoundManager.Play(SoundManager.Effect.EnemyDefeated);
             Die();
             return;
         }
+
+        SoundManager.Play(SoundManager.Effect.EnemyHit);
 
         if (flashCoroutine != null)
         {
