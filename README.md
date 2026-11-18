@@ -61,8 +61,8 @@
 | 経験値回収 | 完了 | プレイヤーがオーブに触れると経験値を取得 |
 | レベルアップ | 完了 | 経験値が必要量に達するとレベルアップ |
 | 強化選択 | 完了 | ゲームを一時停止し、候補から1つ選ぶ |
-| プレイヤーHP | 完了 | 初期HP100。敵との接触でダメージを受け、0でゲームオーバー |
-| 制限時間 | 完了 | 180秒。残り時間を画面右上に表示 |
+| プレイヤーHP | 完了 | 初期HP100。敵との接触でダメージを受け、短い無敵時間あり。0でゲームオーバー |
+| 制限時間 | 完了 | 180秒。残り時間を画面右下に表示 |
 | ゲーム終了・リザルト | 完了 | 時間切れでクリア、HP0でゲームオーバー。生存時間・撃破数・到達レベルを表示 |
 | リスタート | 完了 | 敵・経験値・強化・HP・プレイヤー位置を初期化して再挑戦 |
 
@@ -122,7 +122,7 @@
 | ファイル | 役割 |
 |---|---|
 | `Assets/Scripts/Player/PlayerController.cs` | プレイヤー移動、開始位置の保存とリスタート時の位置復元 |
-| `Assets/Scripts/Player/PlayerHealth.cs` | プレイヤーHP、ダメージ、死亡判定 |
+| `Assets/Scripts/Player/PlayerHealth.cs` | プレイヤーHP、ダメージ、短時間の被ダメージ無効化、死亡判定 |
 | `Assets/Scripts/Player/PlayerAutoAttack.cs` | 操作難易度に応じたエネルギー弾の照準・発射 |
 | `Assets/Scripts/Player/PlayerExperience.cs` | 経験値、レベルアップ、スクロール可能な強化選択、デバッグ経験値操作 |
 | `Assets/Scripts/Camera/CameraFollow.cs` | カメラ追従 |
@@ -146,6 +146,8 @@
 - Input Systemを使用している。旧Input Manager前提のコードを不用意に追加しない。
 - `GameSettings.Instance` が存在しない場合に備え、一部スクリプトは標準倍率へフォールバックする。
 - `PlayerExperience` はプレイヤー本体に追加する。現在の実装では、レベルアップ時に `PlayerAutoAttack` 等の攻撃コンポーネントを同じGameObjectまたは子から取得する。
+- `PlayerController` が `PlayerHealth` を自動追加し、`GameSessionManager` は起動時に自動生成されるため、これら2つはHierarchyへ手動追加しなくてよい。
+- 敵はプレイヤーに接近すると1秒間隔で10ダメージを与える。プレイヤー側には0.35秒の共通無敵時間がある。
 - 新攻撃はレベルアップ時に `gameObject.AddComponent<T>()` でプレイヤーに追加する設計。
 - 回転オーブ・衝撃波・雷撃は現状、自動で攻撃する。個別の手動発動キーはまだない。
 - 衝撃波の攻撃判定は `Physics.OverlapSphere`、雷撃の対象検索は `FindObjectsByType<EnemyHealth>` を使用する。雷撃は1回の攻撃中に敵一覧を1度だけ取得し、連鎖先の検索で使い回す。
