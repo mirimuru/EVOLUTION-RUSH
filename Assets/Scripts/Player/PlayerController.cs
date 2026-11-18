@@ -15,6 +15,8 @@ public class PlayerController : MonoBehaviour
     private Vector3 startPosition;
     private Quaternion startRotation;
 
+    public float MoveSpeed => moveSpeed;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
