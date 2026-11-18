@@ -113,6 +113,21 @@ public class GameSessionManager : MonoBehaviour
         defeatedEnemyCount++;
     }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    /// <summary>デバッグ用。ゲーム内タイマーを指定秒数だけ進める。</summary>
+    public void DebugAdvanceTime(float seconds)
+    {
+        if (!IsRunning || seconds <= 0f) return;
+
+        elapsedTime = Mathf.Min(runDuration, elapsedTime + seconds);
+        if (elapsedTime >= runDuration)
+        {
+            elapsedTime = runDuration;
+            EndRun(false);
+        }
+    }
+#endif
+
     public void EndRun(bool wasCleared)
     {
         if (hasFinished) return;
