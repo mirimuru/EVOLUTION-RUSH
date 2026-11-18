@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -8,7 +9,15 @@ public class EnemyHealth : MonoBehaviour
     [Header("Health Settings")]
     [SerializeField] private int maxHealth = 3;
 
+    [Header("Hit Feedback")]
+    [SerializeField] private float flashDuration = 0.08f;
+
     private int currentHealth;
+    private Renderer[] cachedRenderers;
+    private Material[][] cachedMaterials;
+    private Color[][] originalColors;
+    private string[][] colorProperties;
+    private Coroutine flashCoroutine;
 
     private void Awake()
     {
@@ -17,6 +26,39 @@ public class EnemyHealth : MonoBehaviour
             : 1f;
 
         currentHealth = Mathf.Max(1, Mathf.RoundToInt(maxHealth * difficultyMultiplier));
+        CacheRendererMaterials();
+    }
+
+    private void CacheRendererMaterials()
+    {
+        cachedRenderers = GetComponentsInChildren<Renderer>(true);
+        cachedMaterials = new Material[cachedRenderers.Length][];
+        originalColors = new Color[cachedRenderers.Length][];
+        colorProperties = new string[cachedRenderers.Length][];
+
+        for (int i = 0; i < cachedRenderers.Length; i++)
+        {
+            // materialsを取得して、この敵専用のマテリアルとして扱う。
+            cachedMaterials[i] = cachedRenderers[i].materials;
+            originalColors[i] = new Color[cachedMaterials[i].Length];
+            colorProperties[i] = new string[cachedMaterials[i].Length];
+
+            for (int j = 0; j < cachedMaterials[i].Length; j++)
+            {
+                Material material = cachedMaterials[i][j];
+
+                if (material.HasProperty("_BaseColor"))
+                {
+                    colorProperties[i][j] = "_BaseColor";
+                    originalColors[i][j] = material.GetColor("_BaseColor");
+                }
+                else if (material.HasProperty("_Color"))
+                {
+                    colorProperties[i][j] = "_Color";
+                    originalColors[i][j] = material.GetColor("_Color");
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -35,6 +77,52 @@ public class EnemyHealth : MonoBehaviour
         if (currentHealth <= 0)
         {
             Die();
+            return;
+        }
+
+        if (flashCoroutine != null)
+        {
+            StopCoroutine(flashCoroutine);
+        }
+
+        flashCoroutine = StartCoroutine(FlashWhenDamaged());
+    }
+
+    private IEnumerator FlashWhenDamaged()
+    {
+        SetRendererColors(Color.white);
+        yield return new WaitForSeconds(flashDuration);
+        RestoreRendererColors();
+        flashCoroutine = null;
+    }
+
+    private void SetRendererColors(Color color)
+    {
+        for (int i = 0; i < cachedMaterials.Length; i++)
+        {
+            for (int j = 0; j < cachedMaterials[i].Length; j++)
+            {
+                string property = colorProperties[i][j];
+                if (!string.IsNullOrEmpty(property))
+                {
+                    cachedMaterials[i][j].SetColor(property, color);
+                }
+            }
+        }
+    }
+
+    private void RestoreRendererColors()
+    {
+        for (int i = 0; i < cachedMaterials.Length; i++)
+        {
+            for (int j = 0; j < cachedMaterials[i].Length; j++)
+            {
+                string property = colorProperties[i][j];
+                if (!string.IsNullOrEmpty(property))
+                {
+                    cachedMaterials[i][j].SetColor(property, originalColors[i][j]);
+                }
+            }
         }
     }
 
