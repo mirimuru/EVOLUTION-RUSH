@@ -32,6 +32,7 @@ public class PlayerHealth : MonoBehaviour
 
         currentHealth = Mathf.Max(0, currentHealth - damage);
         nextDamageTime = Time.time + damageInvulnerabilityTime;
+        SoundManager.Play(SoundManager.Effect.PlayerDamaged);
 
         if (currentHealth <= 0)
         {
