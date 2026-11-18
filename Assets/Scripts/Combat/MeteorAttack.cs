@@ -23,6 +23,9 @@ public class MeteorAttack : MonoBehaviour
     public int RadiusUpgradeLevel { get; private set; }
     public int DamageUpgradeLevel { get; private set; }
     public int CooldownUpgradeLevel { get; private set; }
+    public bool BranchChosen { get; private set; }
+    public bool IsEvolved { get; private set; }
+    public int TotalUpgradeLevel => CountUpgradeLevel + RadiusUpgradeLevel + DamageUpgradeLevel + CooldownUpgradeLevel;
 
     private void Start()
     {
@@ -198,6 +201,25 @@ public class MeteorAttack : MonoBehaviour
         Material m = r.material;
         if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", color);
         if (m.HasProperty("_Color")) m.SetColor("_Color", color);
+    }
+
+    public bool ApplyBranchUpgrade(bool rain)
+    {
+        if (BranchChosen) return false;
+        if (rain) meteorCount = Mathf.Min(6, meteorCount + 2);
+        else explosionRadius += 1.5f;
+        BranchChosen = true;
+        return true;
+    }
+
+    public bool ApplyEvolution()
+    {
+        if (!BranchChosen || IsEvolved) return false;
+        damage += 4; explosionRadius += 1f;
+        meteorCount = Mathf.Min(8, meteorCount + 1);
+        cooldown = Mathf.Max(1.0f, cooldown * 0.8f);
+        IsEvolved = true;
+        return true;
     }
 
     public bool ApplyCountUpgrade()
