@@ -133,4 +133,24 @@ public class EnemyHealth : MonoBehaviour
         ExperienceOrb.Create(transform.position + Vector3.up * 0.5f, experienceValue);
         Destroy(gameObject);
     }
+
+    private void OnDestroy()
+    {
+        // Renderer.materialsで生成した敵専用マテリアルを解放する。
+        if (cachedMaterials == null) return;
+
+        for (int i = 0; i < cachedMaterials.Length; i++)
+        {
+            if (cachedMaterials[i] == null) continue;
+
+            for (int j = 0; j < cachedMaterials[i].Length; j++)
+            {
+                Material material = cachedMaterials[i][j];
+                if (material != null)
+                {
+                    Destroy(material);
+                }
+            }
+        }
+    }
 }
