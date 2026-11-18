@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 public class EnemyHealth : MonoBehaviour
 {
-    public static event System.Action EnemyDefeated;
+    public static event System.Action<EnemyHealth> EnemyDefeated;
     [Header("Health Settings")]
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private int experienceValue = 1;
@@ -21,6 +21,9 @@ public class EnemyHealth : MonoBehaviour
     private string[][] colorProperties;
     private Coroutine flashCoroutine;
 
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+
     private void Awake()
     {
         float difficultyMultiplier = GameSettings.Instance != null
@@ -29,6 +32,18 @@ public class EnemyHealth : MonoBehaviour
 
         currentHealth = Mathf.Max(1, Mathf.RoundToInt(maxHealth * difficultyMultiplier));
         CacheRendererMaterials();
+    }
+
+    public void ApplyRunHealthMultiplier(float runMultiplier)
+    {
+        float difficultyMultiplier = GameSettings.Instance != null ? GameSettings.Instance.EnemyHealthMultiplier : 1f;
+        currentHealth = Mathf.Max(1, Mathf.RoundToInt(maxHealth * difficultyMultiplier * runMultiplier));
+    }
+
+    public void SetMaxHealth(int value)
+    {
+        maxHealth = Mathf.Max(1, value);
+        currentHealth = maxHealth;
     }
 
     private void CacheRendererMaterials()
@@ -130,7 +145,7 @@ public class EnemyHealth : MonoBehaviour
 
     private void Die()
     {
-        EnemyDefeated?.Invoke();
+        EnemyDefeated?.Invoke(this);
 
         // 敵を倒した位置に経験値オーブを出現させる。
         ExperienceOrb.Create(transform.position + Vector3.up * 0.5f, experienceValue);
