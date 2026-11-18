@@ -95,11 +95,11 @@ public class MeteorAttack : MonoBehaviour
 
     private IEnumerator MeteorRoutine(Vector3 target)
     {
-        // 着弾予告の赤い円
+        // 着弾予告の紫色ネオンリング
         GameObject warning = new GameObject("MeteorWarning");
         warning.transform.position = new Vector3(target.x, 0.2f, target.z);
         LineRenderer line = warning.AddComponent<LineRenderer>();
-        SetupLine(line, new Color(1f, 0.25f, 0.1f, 0.9f), 0.1f);
+        SetupLine(line, new Color(0.72f, 0.12f, 1f, 0.95f), 0.13f);
         DrawCircle(line, explosionRadius);
 
         // 落下する隕石
@@ -108,7 +108,7 @@ public class MeteorAttack : MonoBehaviour
         Collider col = meteor.GetComponent<Collider>();
         if (col != null) Destroy(col);
         meteor.transform.localScale = Vector3.one * 1.2f;
-        SetColor(meteor, new Color(1f, 0.45f, 0.1f));
+        SetColor(meteor, new Color(0.45f, 0.12f, 0.95f));
         Vector3 start = new Vector3(target.x, spawnHeight, target.z);
         meteor.transform.position = start;
 
@@ -118,7 +118,7 @@ public class MeteorAttack : MonoBehaviour
         {
             t += Time.deltaTime;
             float a = 0.4f + 0.5f * Mathf.Abs(Mathf.Sin(t * 12f));
-            line.startColor = line.endColor = new Color(1f, 0.25f, 0.1f, a);
+            line.startColor = line.endColor = new Color(0.65f, 0.12f, 1f, a);
             yield return null;
         }
 
@@ -166,7 +166,7 @@ public class MeteorAttack : MonoBehaviour
             t += Time.deltaTime;
             float k = Mathf.Clamp01(t / duration);
             fx.transform.localScale = Vector3.one * Mathf.Lerp(0.5f, explosionRadius * 2f, k);
-            SetColor(fx, new Color(1f, Mathf.Lerp(0.6f, 0.15f, k), 0.05f));
+            SetColor(fx, Color.Lerp(new Color(0.2f, 0.9f, 1f), new Color(0.65f, 0.08f, 1f), k));
             yield return null;
         }
         Destroy(fx);
@@ -201,6 +201,11 @@ public class MeteorAttack : MonoBehaviour
         Material m = r.material;
         if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", color);
         if (m.HasProperty("_Color")) m.SetColor("_Color", color);
+        if (m.HasProperty("_EmissionColor"))
+        {
+            m.EnableKeyword("_EMISSION");
+            m.SetColor("_EmissionColor", color * 2.5f);
+        }
     }
 
     public bool ApplyBranchUpgrade(bool rain)
