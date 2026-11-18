@@ -36,12 +36,6 @@ public class EnemyAI : MonoBehaviour
         Vector3 direction = target.position - transform.position;
         direction.y = 0f;
 
-        if (direction.sqrMagnitude < 0.01f)
-        {
-            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
-            return;
-        }
-
         float distanceSqr = direction.sqrMagnitude;
         if (distanceSqr <= contactAttackRange * contactAttackRange)
         {
