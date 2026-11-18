@@ -22,6 +22,9 @@ public class GameSessionManager : MonoBehaviour
 
     public bool IsRunning => isRunning && !hasFinished;
     public float RemainingTime => Mathf.Max(0f, runDuration - elapsedTime);
+    public float ElapsedTime => elapsedTime;
+    public float Progress => Mathf.Clamp01(elapsedTime / runDuration);
+    public bool BossPhaseStarted => elapsedTime >= 150f;
     public int DefeatedEnemyCount => defeatedEnemyCount;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -78,7 +81,7 @@ public class GameSessionManager : MonoBehaviour
         if (elapsedTime >= runDuration)
         {
             elapsedTime = runDuration;
-            EndRun(true);
+            EndRun(false);
         }
     }
 
@@ -99,12 +102,15 @@ public class GameSessionManager : MonoBehaviour
         }
     }
 
-    private void HandleEnemyDefeated()
+    private void HandleEnemyDefeated(EnemyHealth defeatedEnemy)
     {
-        if (IsRunning)
+        if (!IsRunning) return;
+        if (defeatedEnemy != null && defeatedEnemy.GetComponent<BossAI>() != null)
         {
-            defeatedEnemyCount++;
+            EndRun(true);
+            return;
         }
+        defeatedEnemyCount++;
     }
 
     public void EndRun(bool wasCleared)
@@ -140,11 +146,11 @@ public class GameSessionManager : MonoBehaviour
 
         GUILayout.BeginArea(panel, GUI.skin.window);
         GUILayout.Space(18f);
-        GUILayout.Label(cleared ? "SURVIVED!" : "GAME OVER", MakeCenteredStyle(30));
+        GUILayout.Label(cleared ? "BOSS DEFEATED!" : "GAME OVER", MakeCenteredStyle(30));
         GUILayout.Space(12f);
         GUILayout.Label(cleared
-            ? "3分間の生存に成功しました！"
-            : "HPがなくなりました。", MakeCenteredStyle(16));
+            ? "ボスを撃破しました！"
+            : (elapsedTime >= runDuration ? "ボスを時間内に倒せませんでした。" : "HPがなくなりました。"), MakeCenteredStyle(16));
         GUILayout.Space(20f);
         GUILayout.Label($"生存時間：{FormatTime(elapsedTime)}", MakeCenteredStyle(18));
         GUILayout.Label($"敵撃破数：{defeatedEnemyCount}", MakeCenteredStyle(18));
@@ -178,6 +184,12 @@ public class GameSessionManager : MonoBehaviour
     private void RestartRun()
     {
         FindPlayerReferences();
+
+        BossAI[] bosses = FindObjectsByType<BossAI>(FindObjectsSortMode.None);
+        foreach (BossAI boss in bosses)
+        {
+            if (boss != null) Destroy(boss.gameObject);
+        }
 
         EnemyAI[] enemies = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
         foreach (EnemyAI enemy in enemies)
