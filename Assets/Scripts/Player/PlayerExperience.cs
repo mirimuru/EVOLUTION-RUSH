@@ -145,6 +145,7 @@ public class PlayerExperience : MonoBehaviour
     {
         currentExperience -= experienceToNextLevel;
         level++;
+        SoundManager.Play(SoundManager.Effect.LevelUp);
         experienceToNextLevel = Mathf.Max(
             experienceToNextLevel + 1,
             Mathf.CeilToInt(experienceToNextLevel * experienceGrowth)
@@ -428,6 +429,11 @@ public class PlayerExperience : MonoBehaviour
             return;
         }
 
+        bool isEvolution = choice.kind == UpgradeKind.EvolveEnergy ||
+            choice.kind == UpgradeKind.EvolveOrb || choice.kind == UpgradeKind.EvolveShockwave ||
+            choice.kind == UpgradeKind.EvolveLightning || choice.kind == UpgradeKind.EvolveMeteor ||
+            choice.kind == UpgradeKind.PlasmaFusion;
+        SoundManager.Play(isEvolution ? SoundManager.Effect.Evolution : SoundManager.Effect.Upgrade);
         Debug.Log($"強化取得: {choice.title}");
         choosingUpgrade = false;
         choices.Clear();
