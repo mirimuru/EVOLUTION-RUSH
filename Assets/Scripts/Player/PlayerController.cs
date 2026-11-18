@@ -26,6 +26,11 @@ public class PlayerController : MonoBehaviour
         {
             gameObject.AddComponent<PlayerHealth>();
         }
+
+        // 仮モデルを自動生成。後から専用3Dモデルに置き換えられる。
+        NeonCharacterVisuals visuals = GetComponent<NeonCharacterVisuals>();
+        if (visuals == null) visuals = gameObject.AddComponent<NeonCharacterVisuals>();
+        visuals.BuildPlayer();
     }
 
     public void ResetPlayerPosition()
