@@ -109,7 +109,7 @@ public class LightningAttack : MonoBehaviour
             LineRenderer line = effect.AddComponent<LineRenderer>();
             line.positionCount = 7;
             line.useWorldSpace = true;
-            line.widthMultiplier = lineWidth;
+            line.widthMultiplier = lineWidth * 1.8f;
             line.numCapVertices = 2;
             line.numCornerVertices = 2;
 
@@ -118,12 +118,12 @@ public class LightningAttack : MonoBehaviour
             if (shader != null)
             {
                 Material material = new Material(shader);
-                material.color = new Color(0.45f, 0.85f, 1f);
+                material.color = new Color(0.12f, 0.45f, 1f);
                 line.material = material;
             }
 
-            line.startColor = new Color(0.55f, 0.9f, 1f);
-            line.endColor = new Color(0.2f, 0.55f, 1f);
+            line.startColor = new Color(0.9f, 0.98f, 1f);
+            line.endColor = new Color(0.35f, 0.2f, 1f);
 
             for (int point = 0; point < line.positionCount; point++)
             {
