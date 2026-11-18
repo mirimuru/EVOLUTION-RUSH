@@ -15,6 +15,7 @@ public class EnergyProjectile : MonoBehaviour
     private Rigidbody rb;
     private bool initialized;
     private bool hasHit;
+    private Material trailMaterial;
 
     private void Awake()
     {
@@ -60,6 +61,7 @@ public class EnergyProjectile : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(direction);
         rb.linearVelocity = direction * speed;
 
+        CreateNeonTrail();
         initialized = true;
         Destroy(gameObject, lifetime);
     }
@@ -70,6 +72,54 @@ public class EnergyProjectile : MonoBehaviour
         if (!initialized)
         {
             Initialize(transform.forward, speed, damage, lifetime);
+        }
+    }
+
+    private void CreateNeonTrail()
+    {
+        TrailRenderer trail = GetComponent<TrailRenderer>();
+        if (trail == null) trail = gameObject.AddComponent<TrailRenderer>();
+
+        trail.time = 0.16f;
+        trail.startWidth = 0.22f;
+        trail.endWidth = 0.015f;
+        trail.minVertexDistance = 0.04f;
+        trail.numCornerVertices = 4;
+        trail.numCapVertices = 4;
+
+        Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+        if (shader == null) shader = Shader.Find("Sprites/Default");
+        if (shader != null)
+        {
+            trailMaterial = new Material(shader);
+            if (trailMaterial.HasProperty("_BaseColor"))
+                trailMaterial.SetColor("_BaseColor", new Color(0.05f, 0.75f, 1f, 0.85f));
+            if (trailMaterial.HasProperty("_Color"))
+                trailMaterial.SetColor("_Color", new Color(0.05f, 0.75f, 1f, 0.85f));
+            trail.material = trailMaterial;
+        }
+
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[]
+            {
+                new GradientColorKey(new Color(0.55f, 0.95f, 1f), 0f),
+                new GradientColorKey(new Color(0.05f, 0.35f, 1f), 1f)
+            },
+            new GradientAlphaKey[]
+            {
+                new GradientAlphaKey(0.95f, 0f),
+                new GradientAlphaKey(0f, 1f)
+            });
+        trail.colorGradient = gradient;
+    }
+
+    private void OnDestroy()
+    {
+        if (trailMaterial != null)
+        {
+            if (Application.isPlaying) Destroy(trailMaterial);
+            else DestroyImmediate(trailMaterial);
         }
     }
 
