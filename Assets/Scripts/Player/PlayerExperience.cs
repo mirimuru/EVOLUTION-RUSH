@@ -71,7 +71,6 @@ public class PlayerExperience : MonoBehaviour
     [SerializeField] private bool showDebugPanel;
     [SerializeField] private string debugExperienceInput = "10";
     private string debugMessage = "";
-    private GameSessionManager debugSessionManager;
 #endif
 
     public int Level => level;
@@ -489,7 +488,7 @@ public class PlayerExperience : MonoBehaviour
     private void DrawDebugPanel()
     {
         const float panelWidth = 260f;
-        const float panelHeight = 245f;
+        const float panelHeight = 185f;
 
         Rect toggleRect = new Rect(Screen.width - 105f, 10f, 95f, 28f);
         if (GUI.Button(toggleRect, showDebugPanel ? "DEBUG ▼" : "DEBUG ▶"))
@@ -528,23 +527,8 @@ public class PlayerExperience : MonoBehaviour
             GUILayout.Label(debugMessage);
         }
 
-        GUILayout.Space(8f);
-        GUILayout.Label("タイマーデバッグ");
-        debugSessionManager = GameSessionManager.Instance;
-        if (debugSessionManager != null)
-        {
-            GUILayout.Label($"経過：{Mathf.FloorToInt(debugSessionManager.ElapsedTime)}秒 / 残り：{Mathf.CeilToInt(debugSessionManager.RemainingTime)}秒");
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("+10秒")) debugSessionManager.DebugAdvanceTime(10f);
-            if (GUILayout.Button("+30秒")) debugSessionManager.DebugAdvanceTime(30f);
-            if (GUILayout.Button("+60秒")) debugSessionManager.DebugAdvanceTime(60f);
-            GUILayout.EndHorizontal();
-        }
-        else
-        {
-            GUILayout.Label("ゲームタイマーを取得できません。");
-        }
-
+        GUILayout.Space(6f);
+        GUILayout.Label("タイマー操作は画面左下のDEBUG TIMEから行えます。");
         GUILayout.EndArea();
     }
 
