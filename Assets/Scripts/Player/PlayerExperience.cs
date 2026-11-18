@@ -251,20 +251,30 @@ public class PlayerExperience : MonoBehaviour
         }
 
         if (playerAttack != null && !playerAttack.BranchChosen)
+        {
             available.Add(new UpgradeChoice(UpgradeKind.EnergyBranch, "エネルギー弾：連射型", "発射間隔を大幅に短縮する", true));
             available.Add(new UpgradeChoice(UpgradeKind.EnergyBranch, "エネルギー弾：重撃型", "弾の威力と弾速を大きく上げる", false));
+        }
         if (orbitingOrbAttack != null && !orbitingOrbAttack.BranchChosen)
+        {
             available.Add(new UpgradeChoice(UpgradeKind.OrbBranch, "回転オーブ：群体型", "オーブを2個追加する", true));
             available.Add(new UpgradeChoice(UpgradeKind.OrbBranch, "回転オーブ：高威力型", "オーブの威力と軌道半径を上げる", false));
+        }
         if (shockwaveAttack != null && !shockwaveAttack.BranchChosen)
+        {
             available.Add(new UpgradeChoice(UpgradeKind.ShockwaveBranch, "衝撃波：広範囲型", "攻撃範囲を大きく広げる", true));
             available.Add(new UpgradeChoice(UpgradeKind.ShockwaveBranch, "衝撃波：高速発動型", "発動間隔を大幅に短縮する", false));
+        }
         if (lightningAttack != null && !lightningAttack.BranchChosen)
+        {
             available.Add(new UpgradeChoice(UpgradeKind.LightningBranch, "雷撃：連鎖型", "連鎖する敵の数を3体増やす", true));
             available.Add(new UpgradeChoice(UpgradeKind.LightningBranch, "雷撃：高威力型", "雷撃の威力を大きく上げる", false));
+        }
         if (meteorAttack != null && !meteorAttack.BranchChosen)
+        {
             available.Add(new UpgradeChoice(UpgradeKind.MeteorBranch, "メテオ：隕石雨型", "一度に落とす隕石を2個追加する", true));
             available.Add(new UpgradeChoice(UpgradeKind.MeteorBranch, "メテオ：大爆発型", "爆発範囲を大きく広げる", false));
+        }
 
         if (evolutionCores < 3)
             available.Add(new UpgradeChoice(UpgradeKind.EvolutionCore, "進化アイテム：進化コア", "攻撃の進化に必要なコアを1個獲得"));
