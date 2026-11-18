@@ -21,6 +21,9 @@ public class LightningAttack : MonoBehaviour
     public int DamageUpgradeLevel { get; private set; }
     public int ChainUpgradeLevel { get; private set; }
     public int CooldownUpgradeLevel { get; private set; }
+    public bool BranchChosen { get; private set; }
+    public bool IsEvolved { get; private set; }
+    public int TotalUpgradeLevel => DamageUpgradeLevel + ChainUpgradeLevel + CooldownUpgradeLevel;
 
     private void Start()
     {
@@ -148,6 +151,23 @@ public class LightningAttack : MonoBehaviour
         {
             if (effect != null) Destroy(effect);
         }
+    }
+
+    public bool ApplyBranchUpgrade(bool chain)
+    {
+        if (BranchChosen) return false;
+        if (chain) chainCount += 3;
+        else damage += 3;
+        BranchChosen = true;
+        return true;
+    }
+
+    public bool ApplyEvolution()
+    {
+        if (!BranchChosen || IsEvolved) return false;
+        damage += 3; chainCount += 2; chainRange += 1.5f;
+        IsEvolved = true;
+        return true;
     }
 
     public bool ApplyDamageUpgrade()
