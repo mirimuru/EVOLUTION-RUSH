@@ -218,7 +218,8 @@ public class GameSessionManager : MonoBehaviour
             string objectName = sceneTransform.gameObject.name;
             if (objectName == "MeteorWarning" || objectName == "Meteor" ||
                 objectName == "MeteorExplosion" || objectName == "ShockwaveVisual" ||
-                objectName == "LightningVisual" || objectName == "EnemyHitEffect")
+                objectName == "LightningVisual" || objectName == "EnemyHitEffect" ||
+                objectName == "BossAttackWarning")
             {
                 Destroy(sceneTransform.gameObject);
             }
