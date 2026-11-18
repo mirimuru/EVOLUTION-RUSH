@@ -19,7 +19,11 @@ public class PlayerExperience : MonoBehaviour
         UnlockShockwave,
         ShockwaveRadius,
         ShockwaveDamage,
-        ShockwaveCooldown
+        ShockwaveCooldown,
+        UnlockLightning,
+        LightningDamage,
+        LightningChain,
+        LightningCooldown
     }
 
     private class UpgradeChoice
@@ -45,6 +49,7 @@ public class PlayerExperience : MonoBehaviour
     private PlayerAutoAttack playerAttack;
     private OrbitingOrbAttack orbitingOrbAttack;
     private ShockwaveAttack shockwaveAttack;
+    private LightningAttack lightningAttack;
     private readonly List<UpgradeChoice> choices = new List<UpgradeChoice>();
     private bool choosingUpgrade;
     private float previousTimeScale = 1f;
@@ -63,6 +68,9 @@ public class PlayerExperience : MonoBehaviour
 
         shockwaveAttack = GetComponent<ShockwaveAttack>();
         if (shockwaveAttack == null) shockwaveAttack = GetComponentInChildren<ShockwaveAttack>();
+
+        lightningAttack = GetComponent<LightningAttack>();
+        if (lightningAttack == null) lightningAttack = GetComponentInChildren<LightningAttack>();
     }
 
     public void AddExperience(int amount)
@@ -151,6 +159,22 @@ public class PlayerExperience : MonoBehaviour
                 available.Add(new UpgradeChoice(UpgradeKind.ShockwaveCooldown, "衝撃波：発動間隔短縮", "衝撃波がより短い間隔で発生"));
         }
 
+        if (lightningAttack == null)
+        {
+            available.Add(new UpgradeChoice(UpgradeKind.UnlockLightning, "新攻撃：雷撃", "最も近い敵に雷を落とし、近くの敵へ連鎖ダメージ"));
+        }
+        else
+        {
+            if (lightningAttack.DamageUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.LightningDamage, "雷撃：威力強化", "雷撃のダメージ +1"));
+
+            if (lightningAttack.ChainUpgradeLevel < 4)
+                available.Add(new UpgradeChoice(UpgradeKind.LightningChain, "雷撃：連鎖数増加", "雷が連鎖する敵を1体追加"));
+
+            if (lightningAttack.CooldownUpgradeLevel < 5)
+                available.Add(new UpgradeChoice(UpgradeKind.LightningCooldown, "雷撃：発動間隔短縮", "雷撃がより短い間隔で発生"));
+        }
+
         int count = Mathf.Min(3, available.Count);
         for (int i = 0; i < count; i++)
         {
@@ -212,6 +236,22 @@ public class PlayerExperience : MonoBehaviour
                 break;
             case UpgradeKind.ShockwaveCooldown:
                 applied = shockwaveAttack != null && shockwaveAttack.ApplyCooldownUpgrade();
+                break;
+            case UpgradeKind.UnlockLightning:
+                if (lightningAttack == null)
+                {
+                    lightningAttack = gameObject.AddComponent<LightningAttack>();
+                    applied = true;
+                }
+                break;
+            case UpgradeKind.LightningDamage:
+                applied = lightningAttack != null && lightningAttack.ApplyDamageUpgrade();
+                break;
+            case UpgradeKind.LightningChain:
+                applied = lightningAttack != null && lightningAttack.ApplyChainUpgrade();
+                break;
+            case UpgradeKind.LightningCooldown:
+                applied = lightningAttack != null && lightningAttack.ApplyCooldownUpgrade();
                 break;
         }
 
