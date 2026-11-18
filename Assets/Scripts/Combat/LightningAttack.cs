@@ -31,7 +31,9 @@ public class LightningAttack : MonoBehaviour
     {
         if (Time.time < nextAttackTime) return;
 
-        EnemyHealth firstTarget = FindNearestEnemy(transform.position, attackRange, null);
+        // 1回の雷撃中は敵一覧を使い回し、連鎖ごとの全件検索を避ける。
+        EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
+        EnemyHealth firstTarget = FindNearestEnemy(enemies, transform.position, attackRange, null);
         if (firstTarget == null) return;
 
         List<EnemyHealth> targets = new List<EnemyHealth>();
@@ -43,7 +45,7 @@ public class LightningAttack : MonoBehaviour
 
         for (int i = 0; i < chainCount; i++)
         {
-            EnemyHealth next = FindNearestEnemy(current.transform.position, chainRange, selected);
+            EnemyHealth next = FindNearestEnemy(enemies, current.transform.position, chainRange, selected);
             if (next == null) break;
 
             targets.Add(next);
@@ -60,9 +62,12 @@ public class LightningAttack : MonoBehaviour
         nextAttackTime = Time.time + cooldown;
     }
 
-    private EnemyHealth FindNearestEnemy(Vector3 origin, float range, HashSet<EnemyHealth> excluded)
+    private EnemyHealth FindNearestEnemy(
+        EnemyHealth[] enemies,
+        Vector3 origin,
+        float range,
+        HashSet<EnemyHealth> excluded)
     {
-        EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
         EnemyHealth nearest = null;
         float nearestDistanceSqr = range * range;
 
