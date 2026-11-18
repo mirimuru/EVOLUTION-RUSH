@@ -170,6 +170,14 @@ public class LightningAttack : MonoBehaviour
         return true;
     }
 
+    public void ApplyPlasmaFusionBonus()
+    {
+        if (!IsEvolved) return;
+        damage += 2;
+        chainCount++;
+        chainRange += 2f;
+    }
+
     public bool ApplyDamageUpgrade()
     {
         if (DamageUpgradeLevel >= 5) return false;
