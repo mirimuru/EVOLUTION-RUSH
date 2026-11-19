@@ -26,6 +26,9 @@ public class GameSettings : MonoBehaviour
     public OperationDifficulty OperationMode { get; private set; } = OperationDifficulty.Normal;
     public GameDifficulty GameMode { get; private set; } = GameDifficulty.Normal;
 
+    /// <summary>タイトル画面の表示中などに、難易度設定パネルを隠すためのフラグ。</summary>
+    public static bool SuppressGui { get; set; }
+
     private bool showPanel = true;
 
     // 敵の能力・出現量はゲーム難易度によって変化する。
@@ -146,6 +149,11 @@ public class GameSettings : MonoBehaviour
 
     private void OnGUI()
     {
+        if (SuppressGui)
+        {
+            return;
+        }
+
         if (!showPanel)
         {
             GUILayout.BeginArea(new Rect(10, 10, 130, 35), GUI.skin.box);

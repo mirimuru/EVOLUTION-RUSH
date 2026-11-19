@@ -16,6 +16,7 @@ public class GameSessionManager : MonoBehaviour
     private bool isRunning;
     private bool hasFinished;
     private bool cleared;
+    private bool returnToTitleRequested;
 
     private PlayerController playerController;
     private PlayerHealth playerHealth;
@@ -62,6 +63,15 @@ public class GameSessionManager : MonoBehaviour
 
     private void Update()
     {
+        // OnGUIの描画中に状態を大きく変えないよう、タイトルへの復帰はUpdateで行う。
+        if (returnToTitleRequested)
+        {
+            returnToTitleRequested = false;
+            RestartRun();
+            TitleScreen.Show();
+            return;
+        }
+
         if (hasFinished) return;
 
         FindPlayerReferences();
@@ -149,6 +159,9 @@ public class GameSessionManager : MonoBehaviour
 
     private void OnGUI()
     {
+        // タイトル画面の表示中は、ゲーム内HUDやデバッグ表示を出さない。
+        if (TitleScreen.IsShowing) return;
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         DrawDebugTimerPanel();
 #endif
@@ -164,7 +177,7 @@ public class GameSessionManager : MonoBehaviour
         }
 
         float panelWidth = Mathf.Min(440f, Screen.width - 30f);
-        float panelHeight = 330f;
+        float panelHeight = 392f;
         Rect panel = new Rect(
             (Screen.width - panelWidth) * 0.5f,
             (Screen.height - panelHeight) * 0.5f,
@@ -188,6 +201,12 @@ public class GameSessionManager : MonoBehaviour
         if (GUILayout.Button("もう一度プレイ", GUILayout.Height(48f)))
         {
             RestartRun();
+        }
+
+        GUILayout.Space(8f);
+        if (GUILayout.Button("タイトルへ戻る", GUILayout.Height(40f)))
+        {
+            returnToTitleRequested = true;
         }
 
         GUILayout.EndArea();
