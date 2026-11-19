@@ -11,10 +11,19 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private Transform player;
 
     [Header("Spawn Settings")]
-    [SerializeField] private float spawnInterval = 2f;
+    [SerializeField] private float baseSpawnInterval = 1.5f;
     [SerializeField] private float spawnMinDistance = 9f;
     [SerializeField] private float spawnMaxDistance = 12f;
-    [SerializeField] private int maxEnemies = 12;
+    [SerializeField] private int baseMaxEnemies = 14;
+
+    [Header("Difficulty Ramp")]
+    // 敵が強くなる速さ。2なら、制限時間の半分（90秒）で最大の強さに達する。
+    [SerializeField] private float difficultyRampSpeed = 1.7f;
+    // 最大の強さに達したときの倍率（生成間隔は小さいほど速く出現する）。
+    [SerializeField] private float finalSpawnIntervalScale = 0.35f;
+    [SerializeField] private float finalEnemyCountScale = 2.5f;
+    [SerializeField] private float finalEnemyHealthScale = 2.8f;
+    [SerializeField] private float finalEnemySpeedScale = 1.35f;
 
     [Header("Boss Settings")]
     [SerializeField] private int bossHealth = 120;
@@ -34,6 +43,8 @@ public class EnemySpawner : MonoBehaviour
         if (session != null && !session.IsRunning) return;
 
         float progress = session != null ? session.Progress : 0f;
+        // 時間の経過より速く強くなるよう、進行度を加速させる。
+        float ramp = Mathf.Clamp01(progress * difficultyRampSpeed);
         if (!bossSpawned && session != null && session.BossPhaseStarted)
         {
             SpawnBoss();
@@ -43,10 +54,10 @@ public class EnemySpawner : MonoBehaviour
         spawnTimer += Time.deltaTime;
         float intervalMultiplier = GameSettings.Instance != null ? GameSettings.Instance.SpawnIntervalMultiplier : 1f;
         float countMultiplier = GameSettings.Instance != null ? GameSettings.Instance.EnemyCountMultiplier : 1f;
-        float timeSpawnMultiplier = Mathf.Lerp(1f, 0.55f, progress);
-        float timeCountMultiplier = Mathf.Lerp(1f, 1.8f, progress);
-        float currentSpawnInterval = Mathf.Max(0.25f, spawnInterval * intervalMultiplier * timeSpawnMultiplier);
-        int currentMaxEnemies = Mathf.Max(1, Mathf.CeilToInt(maxEnemies * countMultiplier * timeCountMultiplier));
+        float timeSpawnMultiplier = Mathf.Lerp(1f, finalSpawnIntervalScale, ramp);
+        float timeCountMultiplier = Mathf.Lerp(1f, finalEnemyCountScale, ramp);
+        float currentSpawnInterval = Mathf.Max(0.2f, baseSpawnInterval * intervalMultiplier * timeSpawnMultiplier);
+        int currentMaxEnemies = Mathf.Max(1, Mathf.CeilToInt(baseMaxEnemies * countMultiplier * timeCountMultiplier));
 
         if (spawnTimer >= currentSpawnInterval)
         {
@@ -54,7 +65,7 @@ public class EnemySpawner : MonoBehaviour
 
             if (EnemyAI.ActiveCount < currentMaxEnemies)
             {
-                SpawnEnemy(progress);
+                SpawnEnemy(ramp);
             }
         }
     }
@@ -119,7 +130,7 @@ public class EnemySpawner : MonoBehaviour
         if (enemyAI != null)
         {
             enemyAI.SetTarget(player);
-            enemyAI.SetRunSpeedMultiplier(Mathf.Lerp(1f, 1.35f, progress));
+            enemyAI.SetRunSpeedMultiplier(Mathf.Lerp(1f, finalEnemySpeedScale, progress));
         }
 
         EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
@@ -127,7 +138,7 @@ public class EnemySpawner : MonoBehaviour
         {
             // ネオンモデル生成後に被弾フラッシュの対象を取り直す。
             enemyHealth.RefreshRenderers();
-            enemyHealth.ApplyRunHealthMultiplier(Mathf.Lerp(1f, 1.8f, progress));
+            enemyHealth.ApplyRunHealthMultiplier(Mathf.Lerp(1f, finalEnemyHealthScale, progress));
         }
     }
 }

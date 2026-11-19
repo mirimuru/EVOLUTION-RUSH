@@ -173,6 +173,15 @@
 - HUD：画面上部中央にレベル・経験値ゲージ・進化コア（3個）、画面右下に残り時間・撃破数・HPゲージを表示する。HPは残量で緑→黄→赤紫に変化し、ボス戦（残り30秒）は時間表示とパネルが赤紫になり「BOSS PHASE」を表示する。
 - 新しいUIを追加するときは、`OnGUI` の先頭で `NeonUI.Apply()` を呼び、色は `NeonUI` の定数（Cyan / Violet / Magenta / Green）を使うこと。
 
+### 2.9 ゲームの進行ペース（調整値）
+
+3～5分の発表時間に収まるよう、進行を速めている。値はInspectorで調整できる（新しい項目名のため、シーンに保存済みの古い値は引き継がれない）。
+
+- レベルアップ（`PlayerExperience`）：最初の必要経験値は `startExperienceToNextLevel` = 3、増加率は `experienceGrowthRate` = 1.22（必要経験値は 3, 4, 5, 7, 9, 12, 15…）。
+- 敵の強化（`EnemySpawner`）：進行度を `difficultyRampSpeed` = 1.7 倍に加速し、約106秒で最大の強さに達する。最大時の倍率は、生成間隔 ×0.35、敵の最大数 ×2.5、敵のHP ×2.8、移動速度 ×1.35（ただし敵の移動速度はプレイヤーの90%を上限とする）。序盤の生成間隔は1.5秒、最大数は14体。
+- ゲーム難易度（EASY/NORMAL/HARD）の倍率は、上記に重ねて掛かる。
+- 難しすぎる、または簡単すぎる場合は、`finalEnemyCountScale` と `finalEnemyHealthScale` を最初に調整する。
+
 ## 3. 主なスクリプト構成
 
 | ファイル | 役割 |
@@ -197,6 +206,7 @@
 | `Assets/Scripts/Game/GameSettings.cs` | 操作難易度・ゲーム難易度の管理。`SuppressGui` でタイトル表示中は設定パネルを隠す |
 | `Assets/Scripts/Game/TitleScreen.cs` | タイトル画面（難易度選択・遊び方・START）。表示中は `Time.timeScale = 0` でゲームを停止。自動生成されるため配置不要 |
 | `Assets/Scripts/Audio/MusicManager.cs` | BGMの合成・ループ再生・ボス戦での切り替え・状況に応じた音量調整 |
+| `Assets/Scripts/Visual/NeonEffects.cs` / `NeonRing.cs` | 敵撃破・ボス撃破・進化・レベルアップのパーティクルと発光リング |
 | `Assets/Scripts/Visual/NeonUI.cs` | UI共通のネオン調スキン、パネル・ゲージ・影付き文字の描画ヘルパー |
 | `Assets/Scripts/Visual/ScreenFlash.cs` | 被弾・レベルアップ・ボス登場時の画面フラッシュ |
 | `Assets/Scripts/Audio/SoundManager.cs` | 効果音をC#から合成し、ゲーム内イベントに応じて再生 |
@@ -273,6 +283,8 @@ Unityに戻り、スクリプトのコンパイルが完了するまで待つ。
 ---
 
 ## 6. 開発履歴
+
+- 2026-11-19：敵撃破・ボス撃破・進化・レベルアップのネオン演出（`NeonEffects`、`NeonRing`）を追加。あわせて進行を高速化（必要経験値 5→3・増加率 1.35→1.22、敵の強化を約1.7倍速に加速し、最大時の出現数・HPを引き上げ）。Unity上でのコンパイル・バランス確認は未実施。
 
 - 2026-11-19：UIのネオン統一。`NeonUI` を追加し、全UIにネオン調スキンを適用。HP・経験値・タイマーのHUDをゲージ付きに作り替えた。これまでの `claude/code-review-improvements`、`claude/title-screen`、`claude/bgm-and-flash` を統合して `main` に反映。Unity上でのコンパイル・動作確認は未実施。
 
@@ -354,6 +366,7 @@ Unityに戻り、スクリプトのコンパイルが完了するまで待つ。
 | 19 | タイトル画面、遊び方の説明、リザルトからのタイトル復帰を実装（2026-11-19）。 |
 | 20 | 合成BGM（通常／ボス戦）と画面フラッシュ演出を実装（2026-11-19）。 |
 | 21 | UI全体のネオン調統一とゲージ付きHUDを実装し、これまでの改善ブランチをmainへ統合（2026-11-19）。 |
+| 22 | 撃破・進化・レベルアップの演出を実装し、レベルアップと敵の強化のペースを高速化（2026-11-19）。 |
 
 ---
 

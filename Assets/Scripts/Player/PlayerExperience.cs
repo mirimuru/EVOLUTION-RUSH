@@ -52,8 +52,10 @@ public class PlayerExperience : MonoBehaviour
     [Header("Experience")]
     [SerializeField] private int level = 1;
     [SerializeField] private int currentExperience;
-    [SerializeField] private int experienceToNextLevel = 5;
-    [SerializeField] private float experienceGrowth = 1.35f;
+    [SerializeField] private int experienceToNextLevel = 3;
+    // 以下2つはInspectorで調整できる。最初のレベルアップに必要な経験値と、レベルごとの増加率。
+    [SerializeField] private int startExperienceToNextLevel = 3;
+    [SerializeField] private float experienceGrowthRate = 1.22f;
 
     private PlayerAutoAttack playerAttack;
     private OrbitingOrbAttack orbitingOrbAttack;
@@ -79,6 +81,7 @@ public class PlayerExperience : MonoBehaviour
 
     private void Awake()
     {
+        experienceToNextLevel = startExperienceToNextLevel;
         playerAttack = GetComponent<PlayerAutoAttack>();
         if (playerAttack == null) playerAttack = GetComponentInChildren<PlayerAutoAttack>();
 
@@ -105,7 +108,7 @@ public class PlayerExperience : MonoBehaviour
 
         level = 1;
         currentExperience = 0;
-        experienceToNextLevel = 5;
+        experienceToNextLevel = startExperienceToNextLevel;
         choices.Clear();
         evolutionCores = 0;
         upgradeScrollPosition = Vector2.zero;
@@ -151,7 +154,7 @@ public class PlayerExperience : MonoBehaviour
         NeonEffects.LevelUpRing(transform.position);
         experienceToNextLevel = Mathf.Max(
             experienceToNextLevel + 1,
-            Mathf.CeilToInt(experienceToNextLevel * experienceGrowth)
+            Mathf.CeilToInt(experienceToNextLevel * experienceGrowthRate)
         );
 
         BuildUpgradeChoices();
