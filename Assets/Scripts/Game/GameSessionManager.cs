@@ -15,6 +15,9 @@ public class GameSessionManager : MonoBehaviour
     private int defeatedEnemyCount;
     private bool isRunning;
     private bool hasFinished;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    private bool debugDoubleSpeed;
+#endif
     private bool cleared;
     private bool returnToTitleRequested;
 
@@ -73,6 +76,16 @@ public class GameSessionManager : MonoBehaviour
         }
 
         if (hasFinished) return;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // 一時停止中は変更せず、再開後にデバッグ設定の速度へ戻す。
+        if (Time.timeScale > 0f)
+        {
+            float targetScale = debugDoubleSpeed ? 2f : 1f;
+            if (!Mathf.Approximately(Time.timeScale, targetScale))
+                Time.timeScale = targetScale;
+        }
+#endif
 
         FindPlayerReferences();
 
@@ -220,7 +233,7 @@ public class GameSessionManager : MonoBehaviour
         if (hasFinished) return;
 
         const float panelWidth = 190f;
-        const float panelHeight = 88f;
+        const float panelHeight = 120f;
         Rect panel = new Rect(10f, Screen.height - panelHeight - 10f, panelWidth, panelHeight);
         GUI.Box(panel, "DEBUG TIME");
 
@@ -229,7 +242,17 @@ public class GameSessionManager : MonoBehaviour
             : $"経過 {Mathf.FloorToInt(ElapsedTime)}秒 / 残り {Mathf.CeilToInt(RemainingTime)}秒" + (Time.timeScale == 0f ? " [PAUSED]" : "");
         GUI.Label(new Rect(panel.x + 8f, panel.y + 22f, panelWidth - 16f, 20f), status);
 
-        float buttonY = panel.y + 49f;
+        string speedLabel = debugDoubleSpeed ? "ゲーム速度：2倍" : "ゲーム速度：1倍";
+        GUI.Label(new Rect(panel.x + 8f, panel.y + 43f, panelWidth - 16f, 20f), speedLabel);
+        if (GUI.Button(new Rect(panel.x + 8f, panel.y + 64f, panelWidth - 16f, 24f),
+            debugDoubleSpeed ? "倍速を解除（1x）" : "倍速にする（2x）"))
+        {
+            debugDoubleSpeed = !debugDoubleSpeed;
+            if (Time.timeScale > 0f && !hasFinished)
+                Time.timeScale = debugDoubleSpeed ? 2f : 1f;
+        }
+
+        float buttonY = panel.y + 92f;
         float buttonWidth = (panelWidth - 24f) / 3f;
         if (GUI.Button(new Rect(panel.x + 6f, buttonY, buttonWidth, 28f), "+10秒"))
             DebugAdvanceTime(10f);
@@ -348,6 +371,9 @@ public class GameSessionManager : MonoBehaviour
         hasFinished = false;
         cleared = false;
         isRunning = playerHealth != null;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        debugDoubleSpeed = false;
+#endif
         Time.timeScale = 1f;
     }
 }
