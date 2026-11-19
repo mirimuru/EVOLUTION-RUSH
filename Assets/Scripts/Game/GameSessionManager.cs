@@ -159,6 +159,8 @@ public class GameSessionManager : MonoBehaviour
 
     private void OnGUI()
     {
+        NeonUI.Apply();
+
         // タイトル画面の表示中は、ゲーム内HUDやデバッグ表示を出さない。
         if (TitleScreen.IsShowing) return;
 
@@ -170,8 +172,7 @@ public class GameSessionManager : MonoBehaviour
         {
             if (playerHealth != null)
             {
-                GUI.Box(new Rect(Screen.width - 220f, Screen.height - 92f, 210f, 76f),
-                    $"TIME  {FormatTime(RemainingTime)}\nHP  {playerHealth.CurrentHealth}/{playerHealth.MaxHealth}\nKILLS  {defeatedEnemyCount}");
+                DrawHud();
             }
             return;
         }
@@ -238,6 +239,40 @@ public class GameSessionManager : MonoBehaviour
             DebugAdvanceTime(60f);
     }
 #endif
+
+    /// <summary>画面右下のネオン調HUD（残り時間・撃破数・HP）。</summary>
+    private void DrawHud()
+    {
+        const float width = 300f;
+        const float height = 106f;
+        Rect panel = new Rect(Screen.width - width - 10f, Screen.height - height - 10f, width, height);
+
+        bool bossPhase = BossPhaseStarted;
+        Color accent = bossPhase ? NeonUI.Magenta : NeonUI.Cyan;
+        NeonUI.DrawPanel(panel, accent);
+
+        NeonUI.Label(new Rect(panel.x + 12f, panel.y + 6f, 160f, 34f),
+            "TIME " + FormatTime(RemainingTime), 24, TextAnchor.MiddleLeft, accent);
+        NeonUI.Label(new Rect(panel.xMax - 132f, panel.y + 10f, 120f, 26f),
+            "KILLS " + defeatedEnemyCount, 16, TextAnchor.MiddleRight, NeonUI.Violet);
+
+        float hpRatio = playerHealth.MaxHealth > 0
+            ? playerHealth.CurrentHealth / (float)playerHealth.MaxHealth
+            : 0f;
+        Color hpColor = hpRatio > 0.5f ? NeonUI.Green
+            : (hpRatio > 0.25f ? new Color(1f, 0.8f, 0.2f) : NeonUI.Magenta);
+
+        Rect bar = new Rect(panel.x + 12f, panel.y + 46f, width - 24f, 24f);
+        NeonUI.DrawBar(bar, hpRatio, hpColor);
+        NeonUI.Label(bar, "HP  " + playerHealth.CurrentHealth + " / " + playerHealth.MaxHealth,
+            14, TextAnchor.MiddleCenter, Color.white);
+
+        if (bossPhase)
+        {
+            NeonUI.Label(new Rect(panel.x + 12f, panel.y + 76f, width - 24f, 22f),
+                "! BOSS PHASE !", 14, TextAnchor.MiddleCenter, NeonUI.Magenta);
+        }
+    }
 
     private GUIStyle MakeCenteredStyle(int fontSize)
     {

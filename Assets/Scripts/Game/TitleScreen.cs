@@ -126,6 +126,7 @@ public class TitleScreen : MonoBehaviour
     {
         if (!visible) return;
 
+        NeonUI.Apply();
         BuildStyles();
 
         // 背景を暗くして、ゲーム画面が透けて見えないようにする。

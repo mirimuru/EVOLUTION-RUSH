@@ -154,6 +154,8 @@ public class GameSettings : MonoBehaviour
             return;
         }
 
+        NeonUI.Apply();
+
         if (!showPanel)
         {
             GUILayout.BeginArea(new Rect(10, 10, 130, 35), GUI.skin.box);

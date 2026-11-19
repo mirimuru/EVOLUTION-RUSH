@@ -444,10 +444,38 @@ public class PlayerExperience : MonoBehaviour
         if (currentExperience >= experienceToNextLevel) BeginLevelUp();
     }
 
+    /// <summary>画面上部中央のネオン調HUD（レベル・経験値ゲージ・進化コア）。</summary>
+    private void DrawExperienceHud()
+    {
+        // タイトル画面の表示中は出さない。
+        if (TitleScreen.IsShowing) return;
+
+        const float width = 380f;
+        const float height = 58f;
+        Rect panel = new Rect((Screen.width - width) * 0.5f, 10f, width, height);
+        NeonUI.DrawPanel(panel, NeonUI.Cyan);
+
+        NeonUI.Label(new Rect(panel.x + 12f, panel.y + 6f, 86f, 46f), "LV " + level, 26, TextAnchor.MiddleLeft, NeonUI.Cyan);
+
+        float ratio = experienceToNextLevel > 0 ? currentExperience / (float)experienceToNextLevel : 0f;
+        NeonUI.DrawBar(new Rect(panel.x + 104f, panel.y + 12f, 180f, 16f), ratio, NeonUI.Violet);
+        NeonUI.Label(new Rect(panel.x + 104f, panel.y + 30f, 180f, 18f),
+            "EXP " + currentExperience + " / " + experienceToNextLevel, 12, TextAnchor.MiddleCenter, NeonUI.TextColor);
+
+        // 進化コア（所持数の上限は3）。
+        for (int i = 0; i < 3; i++)
+        {
+            Rect pip = new Rect(panel.x + 304f + i * 22f, panel.y + 12f, 16f, 16f);
+            if (i < evolutionCores) NeonUI.FillRect(pip, NeonUI.Green);
+            NeonUI.DrawOutline(pip, NeonUI.Green, 1.5f);
+        }
+        NeonUI.Label(new Rect(panel.x + 296f, panel.y + 30f, 80f, 18f), "CORE", 12, TextAnchor.MiddleCenter, NeonUI.Green);
+    }
+
     private void OnGUI()
     {
-        GUI.Box(new Rect(Screen.width / 2f - 155f, 10f, 310f, 48f),
-            $"LEVEL {level}    EXP {currentExperience} / {experienceToNextLevel}    CORE {evolutionCores}");
+        NeonUI.Apply();
+        DrawExperienceHud();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         DrawDebugPanel();
