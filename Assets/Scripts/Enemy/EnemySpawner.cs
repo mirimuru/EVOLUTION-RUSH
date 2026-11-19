@@ -90,6 +90,7 @@ public class EnemySpawner : MonoBehaviour
         BossAI bossAI = boss.AddComponent<BossAI>();
         bossAI.SetTarget(player);
         SoundManager.Play(SoundManager.Effect.BossSpawn);
+        ScreenFlash.Trigger(new Color(0.7f, 0.15f, 1f), 0.6f, 0.4f);
     }
 
     private void SpawnEnemy(float progress)

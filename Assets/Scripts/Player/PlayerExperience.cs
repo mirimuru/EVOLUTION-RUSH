@@ -149,6 +149,7 @@ public class PlayerExperience : MonoBehaviour
         currentExperience -= experienceToNextLevel;
         level++;
         SoundManager.Play(SoundManager.Effect.LevelUp);
+        ScreenFlash.Trigger(new Color(0.2f, 0.9f, 1f), 0.35f, 0.3f);
         experienceToNextLevel = Mathf.Max(
             experienceToNextLevel + 1,
             Mathf.CeilToInt(experienceToNextLevel * experienceGrowth)
