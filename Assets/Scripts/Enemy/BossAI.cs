@@ -15,10 +15,13 @@ public class BossAI : MonoBehaviour
     private Transform target;
     private float nextAttackTime;
     private bool isAttacking;
+    private EnemyHealth enemyHealth;
+    private GameObject warningObject;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        enemyHealth = GetComponent<EnemyHealth>();
         nextAttackTime = Time.time + 2f;
     }
 
@@ -51,7 +54,7 @@ public class BossAI : MonoBehaviour
 
     private void OnGUI()
     {
-        EnemyHealth health = GetComponent<EnemyHealth>();
+        EnemyHealth health = enemyHealth;
         Camera camera = Camera.main;
         if (health == null || camera == null || health.CurrentHealth <= 0) return;
 
@@ -78,6 +81,7 @@ public class BossAI : MonoBehaviour
 
         GameObject warning = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         warning.name = "BossAttackWarning";
+        warningObject = warning;
         warning.transform.position = new Vector3(center.x, 0.08f, center.z);
         warning.transform.localScale = new Vector3(attackRadius * 2f, 0.025f, attackRadius * 2f);
         Collider warningCollider = warning.GetComponent<Collider>();
@@ -107,6 +111,13 @@ public class BossAI : MonoBehaviour
         }
 
         Destroy(warning);
+        warningObject = null;
         isAttacking = false;
+    }
+
+    private void OnDestroy()
+    {
+        // 予告攻撃の最中に倒された場合、赤い予告円が残らないようにする。
+        if (warningObject != null) Destroy(warningObject);
     }
 }

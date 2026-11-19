@@ -11,8 +11,13 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private int contactDamage = 10;
     [SerializeField] private float contactAttackInterval = 1f;
 
+    /// <summary>通常敵の数（ボスは含まない）。スポーン数の制限に使う。</summary>
+    public static int ActiveCount { get; private set; }
+
     private Rigidbody rb;
     private Transform target;
+    private PlayerHealth targetHealth;
+    private PlayerController targetController;
     private float nextContactAttackTime;
     private float runSpeedMultiplier = 1f;
 
@@ -21,9 +26,23 @@ public class EnemyAI : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    private void OnEnable()
+    {
+        ActiveCount++;
+    }
+
+    private void OnDisable()
+    {
+        ActiveCount = Mathf.Max(0, ActiveCount - 1);
+    }
+
     public void SetTarget(Transform newTarget)
     {
         target = newTarget;
+
+        // 毎フレームGetComponentしないよう、参照を保持する。
+        targetHealth = newTarget != null ? newTarget.GetComponent<PlayerHealth>() : null;
+        targetController = newTarget != null ? newTarget.GetComponent<PlayerController>() : null;
     }
 
     public void SetRunSpeedMultiplier(float multiplier)
@@ -49,10 +68,10 @@ public class EnemyAI : MonoBehaviour
 
             if (Time.time >= nextContactAttackTime)
             {
-                PlayerHealth playerHealth = target.GetComponent<PlayerHealth>();
-                if (playerHealth != null)
+                if (targetHealth == null) targetHealth = target.GetComponent<PlayerHealth>();
+                if (targetHealth != null)
                 {
-                    playerHealth.TakeDamage(contactDamage);
+                    targetHealth.TakeDamage(contactDamage);
                 }
 
                 nextContactAttackTime = Time.time + contactAttackInterval;
@@ -70,10 +89,10 @@ public class EnemyAI : MonoBehaviour
         float currentMoveSpeed = moveSpeed * difficultyMultiplier * runSpeedMultiplier;
 
         // プレイヤーより少し遅い速度に制限し、逃げ切れる余地を確保する。
-        PlayerController playerController = target.GetComponent<PlayerController>();
-        if (playerController != null)
+        if (targetController == null) targetController = target.GetComponent<PlayerController>();
+        if (targetController != null)
         {
-            currentMoveSpeed = Mathf.Min(currentMoveSpeed, playerController.MoveSpeed * 0.9f);
+            currentMoveSpeed = Mathf.Min(currentMoveSpeed, targetController.MoveSpeed * 0.9f);
         }
 
         rb.linearVelocity = new Vector3(

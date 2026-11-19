@@ -49,10 +49,11 @@ public class MeteorAttack : MonoBehaviour
 
     private bool LaunchMeteors()
     {
-        EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
+        List<EnemyHealth> enemies = EnemyHealth.ActiveEnemies;
         List<Vector3> candidates = new List<Vector3>();
         foreach (EnemyHealth e in enemies)
         {
+            if (e == null || !e.IsAlive) continue;
             Vector3 p = e.transform.position;
             p.y = 0f;
             Vector3 self = transform.position;
@@ -173,15 +174,29 @@ public class MeteorAttack : MonoBehaviour
         Destroy(fx);
     }
 
+    // 着弾予告の円ごとにMaterialを作らず、1つを使い回す（色は頂点カラーで指定する）。
+    private static Material lineMaterial;
+
+    private static Material GetLineMaterial()
+    {
+        if (lineMaterial != null) return lineMaterial;
+
+        Shader shader = Shader.Find("Sprites/Default");
+        if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
+        if (shader == null) return null;
+
+        lineMaterial = new Material(shader);
+        return lineMaterial;
+    }
+
     private static void SetupLine(LineRenderer line, Color color, float width)
     {
         line.useWorldSpace = false;
         line.loop = true;
         line.positionCount = 49;
         line.widthMultiplier = width;
-        Shader shader = Shader.Find("Sprites/Default");
-        if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
-        if (shader != null) line.material = new Material(shader);
+        Material sharedMaterial = GetLineMaterial();
+        if (sharedMaterial != null) line.sharedMaterial = sharedMaterial;
         line.startColor = color;
         line.endColor = color;
     }

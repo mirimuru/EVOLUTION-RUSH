@@ -52,7 +52,7 @@ public class EnemySpawner : MonoBehaviour
         {
             spawnTimer = 0f;
 
-            if (FindObjectsByType<EnemyAI>(FindObjectsSortMode.None).Length < currentMaxEnemies)
+            if (EnemyAI.ActiveCount < currentMaxEnemies)
             {
                 SpawnEnemy(progress);
             }
@@ -124,6 +124,8 @@ public class EnemySpawner : MonoBehaviour
         EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
         if (enemyHealth != null)
         {
+            // ネオンモデル生成後に被弾フラッシュの対象を取り直す。
+            enemyHealth.RefreshRenderers();
             enemyHealth.ApplyRunHealthMultiplier(Mathf.Lerp(1f, 1.8f, progress));
         }
     }

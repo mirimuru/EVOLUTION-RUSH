@@ -17,6 +17,8 @@ public class OrbitingOrbAttack : MonoBehaviour
     private readonly List<GameObject> orbs = new List<GameObject>();
     private readonly Dictionary<EnemyHealth, float> nextHitTimes = new Dictionary<EnemyHealth, float>();
     private float angle;
+    private float cleanupTimer;
+    private readonly List<EnemyHealth> expiredKeys = new List<EnemyHealth>();
 
     public int OrbCountUpgradeLevel { get; private set; }
     public int DamageUpgradeLevel { get; private set; }
@@ -38,6 +40,7 @@ public class OrbitingOrbAttack : MonoBehaviour
         }
 
         angle += rotationSpeed * Time.deltaTime;
+        CleanupHitTimes();
 
         for (int i = 0; i < orbs.Count; i++)
         {
@@ -47,6 +50,23 @@ public class OrbitingOrbAttack : MonoBehaviour
             Vector3 offset = new Vector3(Mathf.Cos(orbAngle), 0.65f, Mathf.Sin(orbAngle)) * orbitRadius;
             orbs[i].transform.position = transform.position + offset;
         }
+    }
+
+    // 倒された敵や、再ヒット可能になった敵の記録を定期的に消してメモリの増加を防ぐ。
+    private void CleanupHitTimes()
+    {
+        cleanupTimer += Time.deltaTime;
+        if (cleanupTimer < 5f) return;
+        cleanupTimer = 0f;
+
+        expiredKeys.Clear();
+        foreach (KeyValuePair<EnemyHealth, float> pair in nextHitTimes)
+        {
+            if (pair.Key == null || pair.Value < Time.time) expiredKeys.Add(pair.Key);
+        }
+
+        foreach (EnemyHealth key in expiredKeys) nextHitTimes.Remove(key);
+        expiredKeys.Clear();
     }
 
     private void RebuildOrbs()

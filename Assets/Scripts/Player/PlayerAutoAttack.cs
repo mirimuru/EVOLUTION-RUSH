@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -138,6 +139,12 @@ public class PlayerAutoAttack : MonoBehaviour
 
     private void Update()
     {
+        // レベルアップ選択中など時間が止まっている間は発射しない（HARDでボタン操作の左クリックが弾になるのを防ぐ）。
+        if (Time.timeScale <= 0f)
+        {
+            return;
+        }
+
         GameSettings.OperationDifficulty mode = GameSettings.Instance != null
             ? GameSettings.Instance.OperationMode
             : GameSettings.OperationDifficulty.Normal;
@@ -216,27 +223,10 @@ public class PlayerAutoAttack : MonoBehaviour
             projectileObject.transform.localScale = Vector3.one * 0.35f;
 
             Renderer projectileRenderer = projectileObject.GetComponent<Renderer>();
-            if (projectileRenderer != null)
+            Material sharedMaterial = GetProjectileMaterial();
+            if (projectileRenderer != null && sharedMaterial != null)
             {
-                Shader projectileShader = Shader.Find("Universal Render Pipeline/Lit");
-                if (projectileShader == null)
-                {
-                    projectileShader = Shader.Find("Standard");
-                }
-
-                if (projectileShader != null)
-                {
-                    Material material = new Material(projectileShader);
-                    material.color = new Color(0.1f, 0.65f, 1f);
-
-                    if (material.HasProperty("_EmissionColor"))
-                    {
-                        material.EnableKeyword("_EMISSION");
-                        material.SetColor("_EmissionColor", new Color(0.05f, 0.35f, 1f) * 2f);
-                    }
-
-                    projectileRenderer.material = material;
-                }
+                projectileRenderer.sharedMaterial = sharedMaterial;
             }
 
             SphereCollider sphereCollider = projectileObject.GetComponent<SphereCollider>();
@@ -261,6 +251,29 @@ public class PlayerAutoAttack : MonoBehaviour
         SoundManager.Play(SoundManager.Effect.PlayerShoot);
     }
 
+    // 発射のたびにMaterialを作らず、1つを使い回す。
+    private static Material projectileMaterial;
+
+    private static Material GetProjectileMaterial()
+    {
+        if (projectileMaterial != null) return projectileMaterial;
+
+        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+        if (shader == null) shader = Shader.Find("Standard");
+        if (shader == null) return null;
+
+        projectileMaterial = new Material(shader);
+        projectileMaterial.color = new Color(0.1f, 0.65f, 1f);
+
+        if (projectileMaterial.HasProperty("_EmissionColor"))
+        {
+            projectileMaterial.EnableKeyword("_EMISSION");
+            projectileMaterial.SetColor("_EmissionColor", new Color(0.05f, 0.35f, 1f) * 2f);
+        }
+
+        return projectileMaterial;
+    }
+
     private Vector3 GetDirectionTo(Vector3 targetPosition)
     {
         Vector3 direction = targetPosition - transform.position;
@@ -270,13 +283,13 @@ public class PlayerAutoAttack : MonoBehaviour
 
     private EnemyHealth FindNearestEnemy()
     {
-        EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
+        List<EnemyHealth> enemies = EnemyHealth.ActiveEnemies;
         EnemyHealth nearestEnemy = null;
         float nearestDistanceSqr = attackRange * attackRange;
 
         foreach (EnemyHealth enemy in enemies)
         {
-            if (enemy == null)
+            if (enemy == null || !enemy.IsAlive)
             {
                 continue;
             }
@@ -310,11 +323,11 @@ public class PlayerAutoAttack : MonoBehaviour
         float nearestDistanceSqr = attackRange * attackRange;
         EnemyHealth nearestEnemy = null;
 
-        EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
+        List<EnemyHealth> enemies = EnemyHealth.ActiveEnemies;
 
         foreach (EnemyHealth enemy in enemies)
         {
-            if (enemy == null)
+            if (enemy == null || !enemy.IsAlive)
             {
                 continue;
             }

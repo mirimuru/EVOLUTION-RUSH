@@ -7,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public class NeonCharacterVisuals : MonoBehaviour
 {
+    // Shader.Findは遅いため、敵の生成ごとに呼ばず1回だけ検索する。
+    private static Shader cachedShader;
+
     private readonly List<Material> ownedMaterials = new List<Material>();
     private Transform visualRoot;
 
@@ -101,11 +104,14 @@ public class NeonCharacterVisuals : MonoBehaviour
 
     private Material MakeMaterial(Color baseColor, Color emission, float intensity)
     {
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-        if (shader == null) shader = Shader.Find("Standard");
-        if (shader == null) shader = Shader.Find("Sprites/Default");
+        if (cachedShader == null)
+        {
+            cachedShader = Shader.Find("Universal Render Pipeline/Lit");
+            if (cachedShader == null) cachedShader = Shader.Find("Standard");
+            if (cachedShader == null) cachedShader = Shader.Find("Sprites/Default");
+        }
 
-        Material material = new Material(shader);
+        Material material = new Material(cachedShader);
         material.color = baseColor;
         if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", baseColor);
         if (material.HasProperty("_EmissionColor"))

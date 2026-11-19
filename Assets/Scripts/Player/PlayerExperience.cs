@@ -133,8 +133,6 @@ public class PlayerExperience : MonoBehaviour
             ? int.MaxValue
             : currentExperience + amount;
 
-        Debug.Log($"経験値 +{amount} ({currentExperience}/{experienceToNextLevel})");
-
         bool runHasFinished = GameSessionManager.Instance != null &&
             GameSessionManager.Instance.HasFinished;
 

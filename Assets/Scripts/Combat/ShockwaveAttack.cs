@@ -52,6 +52,22 @@ public class ShockwaveAttack : MonoBehaviour
         StartCoroutine(ShowShockwave());
     }
 
+    // 衝撃波のたびにMaterialを作らず、1つを使い回す（色は頂点カラーで指定する）。
+    private static Material lineMaterial;
+
+    private static Material GetLineMaterial()
+    {
+        if (lineMaterial != null) return lineMaterial;
+
+        Shader shader = Shader.Find("Sprites/Default");
+        if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
+        if (shader == null) return null;
+
+        lineMaterial = new Material(shader);
+        lineMaterial.color = new Color(0.15f, 0.65f, 1f, 0.95f);
+        return lineMaterial;
+    }
+
     private IEnumerator ShowShockwave()
     {
         GameObject effect = new GameObject("ShockwaveVisual");
@@ -65,14 +81,8 @@ public class ShockwaveAttack : MonoBehaviour
         line.widthMultiplier = 0.16f;
         line.numCapVertices = 4;
 
-        Shader shader = Shader.Find("Sprites/Default");
-        if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
-        if (shader != null)
-        {
-            Material material = new Material(shader);
-            material.color = new Color(0.15f, 0.65f, 1f, 0.95f);
-            line.material = material;
-        }
+        Material sharedMaterial = GetLineMaterial();
+        if (sharedMaterial != null) line.sharedMaterial = sharedMaterial;
 
         line.startColor = new Color(0.65f, 0.95f, 1f, 1f);
         line.endColor = new Color(0.35f, 0.15f, 1f, 0.05f);

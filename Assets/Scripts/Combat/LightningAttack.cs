@@ -35,7 +35,7 @@ public class LightningAttack : MonoBehaviour
         if (Time.time < nextAttackTime) return;
 
         // 1回の雷撃中は敵一覧を使い回し、連鎖ごとの全件検索を避ける。
-        EnemyHealth[] enemies = FindObjectsByType<EnemyHealth>(FindObjectsSortMode.None);
+        List<EnemyHealth> enemies = EnemyHealth.ActiveEnemies;
         EnemyHealth firstTarget = FindNearestEnemy(enemies, transform.position, attackRange, null);
         if (firstTarget == null) return;
 
@@ -67,7 +67,7 @@ public class LightningAttack : MonoBehaviour
     }
 
     private EnemyHealth FindNearestEnemy(
-        EnemyHealth[] enemies,
+        List<EnemyHealth> enemies,
         Vector3 origin,
         float range,
         HashSet<EnemyHealth> excluded)
@@ -77,7 +77,7 @@ public class LightningAttack : MonoBehaviour
 
         foreach (EnemyHealth enemy in enemies)
         {
-            if (enemy == null || (excluded != null && excluded.Contains(enemy))) continue;
+            if (enemy == null || !enemy.IsAlive || (excluded != null && excluded.Contains(enemy))) continue;
 
             Vector3 offset = enemy.transform.position - origin;
             offset.y = 0f;
@@ -91,6 +91,22 @@ public class LightningAttack : MonoBehaviour
         }
 
         return nearest;
+    }
+
+    // 雷のたびにMaterialを作らず、1つを使い回す（色は頂点カラーで指定する）。
+    private static Material lineMaterial;
+
+    private static Material GetLineMaterial()
+    {
+        if (lineMaterial != null) return lineMaterial;
+
+        Shader shader = Shader.Find("Sprites/Default");
+        if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
+        if (shader == null) return null;
+
+        lineMaterial = new Material(shader);
+        lineMaterial.color = new Color(0.12f, 0.45f, 1f);
+        return lineMaterial;
     }
 
     private IEnumerator ShowLightning(List<EnemyHealth> targets)
@@ -114,14 +130,8 @@ public class LightningAttack : MonoBehaviour
             line.numCapVertices = 2;
             line.numCornerVertices = 2;
 
-            Shader shader = Shader.Find("Sprites/Default");
-            if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
-            if (shader != null)
-            {
-                Material material = new Material(shader);
-                material.color = new Color(0.12f, 0.45f, 1f);
-                line.material = material;
-            }
+            Material sharedMaterial = GetLineMaterial();
+            if (sharedMaterial != null) line.sharedMaterial = sharedMaterial;
 
             line.startColor = new Color(0.9f, 0.98f, 1f);
             line.endColor = new Color(0.35f, 0.2f, 1f);

@@ -13,6 +13,7 @@ public class SoundManager : MonoBehaviour
     private static SoundManager instance;
     private AudioSource audioSource;
     private AudioClip[] clips;
+    private float[] lastPlayTimes;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void CreateInstance() => EnsureInstance();
@@ -44,13 +45,35 @@ public class SoundManager : MonoBehaviour
         EnsureInstance();
         if (instance == null || instance.audioSource == null || instance.clips == null) return;
         int index = (int)effect;
-        if (index >= 0 && index < instance.clips.Length && instance.clips[index] != null)
-            instance.audioSource.PlayOneShot(instance.clips[index]);
+        if (index < 0 || index >= instance.clips.Length || instance.clips[index] == null) return;
+
+        // メテオなどで多数の敵が同時に被弾・撃破されても、音が重なって割れないよう間引く。
+        float minInterval = GetMinInterval(effect);
+        if (minInterval > 0f)
+        {
+            float now = Time.unscaledTime;
+            if (now - instance.lastPlayTimes[index] < minInterval) return;
+            instance.lastPlayTimes[index] = now;
+        }
+
+        instance.audioSource.PlayOneShot(instance.clips[index]);
+    }
+
+    private static float GetMinInterval(Effect effect)
+    {
+        switch (effect)
+        {
+            case Effect.EnemyHit: return 0.05f;
+            case Effect.EnemyDefeated: return 0.04f;
+            default: return 0f;
+        }
     }
 
     private void BuildClips()
     {
         clips = new AudioClip[System.Enum.GetValues(typeof(Effect)).Length];
+        lastPlayTimes = new float[clips.Length];
+        for (int i = 0; i < lastPlayTimes.Length; i++) lastPlayTimes[i] = -10f;
         int rate = AudioSettings.outputSampleRate;
         if (rate <= 0) rate = 44100;
         CreateClip(Effect.PlayerShoot, rate, 0.10f, 920f, 360f, 0.20f, 0f);

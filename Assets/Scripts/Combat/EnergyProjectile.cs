@@ -15,7 +15,8 @@ public class EnergyProjectile : MonoBehaviour
     private Rigidbody rb;
     private bool initialized;
     private bool hasHit;
-    private Material trailMaterial;
+    // 弾ごとにMaterialを作ると解放されず増え続けるため、1つを共有する。
+    private static Material trailMaterial;
 
     private void Awake()
     {
@@ -87,17 +88,21 @@ public class EnergyProjectile : MonoBehaviour
         trail.numCornerVertices = 4;
         trail.numCapVertices = 4;
 
-        Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
-        if (shader == null) shader = Shader.Find("Sprites/Default");
-        if (shader != null)
+        if (trailMaterial == null)
         {
-            trailMaterial = new Material(shader);
-            if (trailMaterial.HasProperty("_BaseColor"))
-                trailMaterial.SetColor("_BaseColor", new Color(0.05f, 0.75f, 1f, 0.85f));
-            if (trailMaterial.HasProperty("_Color"))
-                trailMaterial.SetColor("_Color", new Color(0.05f, 0.75f, 1f, 0.85f));
-            trail.material = trailMaterial;
+            Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (shader == null) shader = Shader.Find("Sprites/Default");
+            if (shader != null)
+            {
+                trailMaterial = new Material(shader);
+                if (trailMaterial.HasProperty("_BaseColor"))
+                    trailMaterial.SetColor("_BaseColor", new Color(0.05f, 0.75f, 1f, 0.85f));
+                if (trailMaterial.HasProperty("_Color"))
+                    trailMaterial.SetColor("_Color", new Color(0.05f, 0.75f, 1f, 0.85f));
+            }
         }
+
+        if (trailMaterial != null) trail.sharedMaterial = trailMaterial;
 
         Gradient gradient = new Gradient();
         gradient.SetKeys(
@@ -112,15 +117,6 @@ public class EnergyProjectile : MonoBehaviour
                 new GradientAlphaKey(0f, 1f)
             });
         trail.colorGradient = gradient;
-    }
-
-    private void OnDestroy()
-    {
-        if (trailMaterial != null)
-        {
-            if (Application.isPlaying) Destroy(trailMaterial);
-            else DestroyImmediate(trailMaterial);
-        }
     }
 
     private void OnTriggerEnter(Collider other)
