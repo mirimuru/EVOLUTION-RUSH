@@ -224,6 +224,7 @@ public class EnemyHealth : MonoBehaviour
     private void Die()
     {
         EnemyDefeated?.Invoke(this);
+        NeonEffects.EnemyBurst(transform.position + Vector3.up * 0.5f, GetComponent<BossAI>() != null);
 
         // 敵を倒した瞬間に経験値を直接加算する。検索結果は使い回す。
         if (cachedExperience == null)

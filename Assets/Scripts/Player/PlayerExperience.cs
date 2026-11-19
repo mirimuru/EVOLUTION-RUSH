@@ -148,6 +148,7 @@ public class PlayerExperience : MonoBehaviour
         level++;
         SoundManager.Play(SoundManager.Effect.LevelUp);
         ScreenFlash.Trigger(new Color(0.2f, 0.9f, 1f), 0.35f, 0.3f);
+        NeonEffects.LevelUpRing(transform.position);
         experienceToNextLevel = Mathf.Max(
             experienceToNextLevel + 1,
             Mathf.CeilToInt(experienceToNextLevel * experienceGrowth)
@@ -440,6 +441,8 @@ public class PlayerExperience : MonoBehaviour
         choosingUpgrade = false;
         choices.Clear();
         Time.timeScale = previousTimeScale;
+
+        if (isEvolution) NeonEffects.EvolutionBurst(transform.position);
 
         if (currentExperience >= experienceToNextLevel) BeginLevelUp();
     }
