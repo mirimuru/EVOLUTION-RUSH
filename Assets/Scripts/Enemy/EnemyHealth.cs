@@ -69,6 +69,11 @@ public class EnemyHealth : MonoBehaviour
         currentHealth = Mathf.Max(1, Mathf.RoundToInt(maxHealth * difficultyMultiplier * runMultiplier));
     }
 
+    public void SetExperienceValue(int value)
+    {
+        experienceValue = Mathf.Max(1, value);
+    }
+
     public void SetMaxHealth(int value)
     {
         maxHealth = Mathf.Max(1, value);

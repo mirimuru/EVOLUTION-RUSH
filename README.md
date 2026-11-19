@@ -173,6 +173,22 @@
 - HUD：画面上部中央にレベル・経験値ゲージ・進化コア（3個）、画面右下に残り時間・撃破数・HPゲージを表示する。HPは残量で緑→黄→赤紫に変化し、ボス戦（残り30秒）は時間表示とパネルが赤紫になり「BOSS PHASE」を表示する。
 - 新しいUIを追加するときは、`OnGUI` の先頭で `NeonUI.Apply()` を呼び、色は `NeonUI` の定数（Cyan / Violet / Magenta / Green）を使うこと。
 
+### 2.10 敵の種類
+
+`EnemyType`（`EnemyAI.cs`）で4種類を定義し、`EnemySpawner` が進行度（加速後）に応じて出現を抽選する。
+
+| 種類 | 出現開始 | 特徴 |
+|---|---|---|
+| Grunt | 最初から | 基本。まっすぐ追う |
+| Runner | 0.12 | 小型（0.8倍）・速度×1.7（プレイヤーの1.1倍が上限）・HP×0.5・接触ダメージ×0.6 |
+| Shooter | 0.30 | 距離5.5～9mを保ち、2.2秒ごとに弾（`EnemyProjectile`）を撃つ。HP×0.8 |
+| Brute | 0.50 | 大型（1.7倍）・速度×0.65・HP×4・接触ダメージ×2・経験値4 |
+
+- 出現確率は進行度とともに上がる（Runner 10→25%、Shooter 8→18%、Brute 5→12%）。残りはGrunt。
+- 種類ごとのモデルは `NeonCharacterVisuals.BuildEnemy(EnemyType)`、能力は `EnemyAI.Configure(EnemyType)` で設定する。
+- シューターの弾は距離判定（Collider不要）。リスタート時に残った弾は `GameSessionManager.RestartRun` で削除する。
+- 新しい種類を追加するときは、`EnemyType` に追加し、`BuildEnemy`・`Configure`・`ChooseEnemyType`・`GetBodyScale`・`GetHealthScale`・`GetExperienceValue` に対応を足す。
+
 ### 2.9 ゲームの進行ペース（調整値）
 
 3～5分の発表時間に収まるよう、進行を速めている。値はInspectorで調整できる（新しい項目名のため、シーンに保存済みの古い値は引き継がれない）。
@@ -191,6 +207,7 @@
 | `Assets/Scripts/Player/PlayerAutoAttack.cs` | 操作難易度に応じたエネルギー弾の照準・発射、分岐強化・進化・プラズマ融合ボーナス |
 | `Assets/Scripts/Player/PlayerExperience.cs` | 経験値、レベルアップ、通常強化・分岐強化・進化コア・個別進化・特殊進化の選択、デバッグ経験値操作 |
 | `Assets/Scripts/Camera/CameraFollow.cs` | カメラ追従 |
+| `Assets/Scripts/Enemy/EnemyProjectile.cs` | シューターの弾（直進・距離判定でプレイヤーにダメージ） |
 | `Assets/Scripts/Enemy/EnemyAI.cs` | 敵の追跡移動、プレイヤー速度の90%を上限とする速度調整、接近時の接触攻撃 |
 | `Assets/Scripts/Enemy/EnemySpawner.cs` | 敵の生成と最大数管理、通常敵・ボスの仮モデル生成、再挑戦時のタイマー初期化 |
 | `Assets/Scripts/Enemy/EnemyHealth.cs` | 敵HP、被弾、死亡時の直接経験値加算、時間経過HP倍率、被弾演出用マテリアルの解放 |
@@ -284,6 +301,8 @@ Unityに戻り、スクリプトのコンパイルが完了するまで待つ。
 
 ## 6. 開発履歴
 
+- 2026-11-19：敵を4種類に拡張（ランナー・シューター・ブルートを追加）。種類ごとのモデル・能力・出現時期を実装。タイトルの遊び方、操作マニュアル、自己採点メモも更新。Unity上でのコンパイル・バランス確認は未実施。
+
 - 2026-11-19：提出準備。`EditorBuildSettings` にSampleSceneが未登録（ビルドするとシーンが入らない状態）だったため登録。操作マニュアル（`docs/MANUAL.md`）と自己採点メモ（`docs/SELF_ASSESSMENT.md`）を追加。
 
 - 2026-11-19：敵撃破・ボス撃破・進化・レベルアップのネオン演出（`NeonEffects`、`NeonRing`）を追加。あわせて進行を高速化（必要経験値 5→3・増加率 1.35→1.22、敵の強化を約1.7倍速に加速し、最大時の出現数・HPを引き上げ）。Unity上でのコンパイル・バランス確認は未実施。
@@ -370,6 +389,7 @@ Unityに戻り、スクリプトのコンパイルが完了するまで待つ。
 | 21 | UI全体のネオン調統一とゲージ付きHUDを実装し、これまでの改善ブランチをmainへ統合（2026-11-19）。 |
 | 22 | 撃破・進化・レベルアップの演出を実装し、レベルアップと敵の強化のペースを高速化（2026-11-19）。 |
 | 23 | ビルド設定にSampleSceneを登録し、操作マニュアルと自己採点メモを作成（2026-11-19）。 |
+| 24 | 敵の種類を増やし（ランナー・シューター・ブルート）、時間とともに出現させる（2026-11-19）。 |
 
 ---
 

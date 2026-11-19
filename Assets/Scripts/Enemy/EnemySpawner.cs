@@ -25,6 +25,12 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float finalEnemyHealthScale = 2.8f;
     [SerializeField] private float finalEnemySpeedScale = 1.35f;
 
+    [Header("Enemy Variety")]
+    // 各種類が出始める進行度（0～1、加速後）。
+    [SerializeField] private float runnerStartProgress = 0.12f;
+    [SerializeField] private float shooterStartProgress = 0.30f;
+    [SerializeField] private float bruteStartProgress = 0.50f;
+
     [Header("Boss Settings")]
     [SerializeField] private int bossHealth = 120;
     [SerializeField] private float bossSpawnDistance = 15f;
@@ -104,6 +110,53 @@ public class EnemySpawner : MonoBehaviour
         ScreenFlash.Trigger(new Color(0.7f, 0.15f, 1f), 0.6f, 0.4f);
     }
 
+    /// <summary>進行度に応じて、出現させる敵の種類を抽選する。</summary>
+    private EnemyType ChooseEnemyType(float progress)
+    {
+        float runner = progress >= runnerStartProgress ? Mathf.Lerp(0.10f, 0.25f, progress) : 0f;
+        float shooter = progress >= shooterStartProgress ? Mathf.Lerp(0.08f, 0.18f, progress) : 0f;
+        float brute = progress >= bruteStartProgress ? Mathf.Lerp(0.05f, 0.12f, progress) : 0f;
+
+        float roll = Random.value;
+        if (roll < runner) return EnemyType.Runner;
+        roll -= runner;
+        if (roll < shooter) return EnemyType.Shooter;
+        roll -= shooter;
+        if (roll < brute) return EnemyType.Brute;
+        return EnemyType.Grunt;
+    }
+
+    private static float GetBodyScale(EnemyType type)
+    {
+        switch (type)
+        {
+            case EnemyType.Runner: return 0.8f;
+            case EnemyType.Brute: return 1.7f;
+            default: return 1f;
+        }
+    }
+
+    private static float GetHealthScale(EnemyType type)
+    {
+        switch (type)
+        {
+            case EnemyType.Runner: return 0.5f;
+            case EnemyType.Shooter: return 0.8f;
+            case EnemyType.Brute: return 4f;
+            default: return 1f;
+        }
+    }
+
+    private static int GetExperienceValue(EnemyType type)
+    {
+        switch (type)
+        {
+            case EnemyType.Brute: return 4;
+            case EnemyType.Shooter: return 2;
+            default: return 1;
+        }
+    }
+
     private void SpawnEnemy(float progress)
     {
         Vector2 randomDirection = Random.insideUnitCircle.normalized;
@@ -120,15 +173,21 @@ public class EnemySpawner : MonoBehaviour
             randomDirection.y * distance
         );
 
+        EnemyType type = ChooseEnemyType(progress);
+        float bodyScale = GetBodyScale(type);
+        spawnPosition.y = bodyScale;
+
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+        enemy.transform.localScale = Vector3.one * bodyScale;
 
         NeonCharacterVisuals visuals = enemy.GetComponent<NeonCharacterVisuals>();
         if (visuals == null) visuals = enemy.AddComponent<NeonCharacterVisuals>();
-        visuals.BuildEnemy();
+        visuals.BuildEnemy(type);
 
         EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
         if (enemyAI != null)
         {
+            enemyAI.Configure(type);
             enemyAI.SetTarget(player);
             enemyAI.SetRunSpeedMultiplier(Mathf.Lerp(1f, finalEnemySpeedScale, progress));
         }
@@ -138,7 +197,8 @@ public class EnemySpawner : MonoBehaviour
         {
             // ネオンモデル生成後に被弾フラッシュの対象を取り直す。
             enemyHealth.RefreshRenderers();
-            enemyHealth.ApplyRunHealthMultiplier(Mathf.Lerp(1f, finalEnemyHealthScale, progress));
+            enemyHealth.ApplyRunHealthMultiplier(Mathf.Lerp(1f, finalEnemyHealthScale, progress) * GetHealthScale(type));
+            enemyHealth.SetExperienceValue(GetExperienceValue(type));
         }
     }
 }

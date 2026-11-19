@@ -53,6 +53,70 @@ public class NeonCharacterVisuals : MonoBehaviour
         Part(PrimitiveType.Cylinder, "RightHorn", new Vector3(0.28f, 0.48f, 0f), new Vector3(0.22f, 0.42f, 0.22f), shell);
     }
 
+    /// <summary>敵の種類に合わせたモデルを作る。</summary>
+    public void BuildEnemy(EnemyType type)
+    {
+        switch (type)
+        {
+            case EnemyType.Runner: BuildRunner(); break;
+            case EnemyType.Shooter: BuildShooter(); break;
+            case EnemyType.Brute: BuildBrute(); break;
+            default: BuildEnemy(); break;
+        }
+    }
+
+    // ランナー：細長い緑色の体と、後ろに流れるヒレ。
+    private void BuildRunner()
+    {
+        if (visualRoot != null) return;
+        CreateRoot();
+        HideRootRenderers();
+
+        Material shell = MakeMaterial(new Color(0.02f, 0.2f, 0.16f), new Color(0.0f, 0.8f, 0.55f), 1.2f);
+        Material core = MakeMaterial(new Color(0.6f, 1f, 0.3f), new Color(0.4f, 1f, 0.1f), 3.5f);
+
+        Part(PrimitiveType.Sphere, "RunnerBody", Vector3.zero, new Vector3(0.55f, 0.6f, 1.0f), shell);
+        Part(PrimitiveType.Sphere, "RunnerCore", new Vector3(0f, 0.05f, 0.45f), new Vector3(0.25f, 0.25f, 0.14f), core);
+        Part(PrimitiveType.Cube, "RunnerFinL", new Vector3(-0.3f, 0.12f, -0.4f), new Vector3(0.08f, 0.4f, 0.5f), core);
+        Part(PrimitiveType.Cube, "RunnerFinR", new Vector3(0.3f, 0.12f, -0.4f), new Vector3(0.08f, 0.4f, 0.5f), core);
+    }
+
+    // シューター：琥珀色の体と、前に突き出た砲身。
+    private void BuildShooter()
+    {
+        if (visualRoot != null) return;
+        CreateRoot();
+        HideRootRenderers();
+
+        Material shell = MakeMaterial(new Color(0.22f, 0.12f, 0.02f), new Color(0.9f, 0.45f, 0.02f), 1.0f);
+        Material core = MakeMaterial(new Color(1f, 0.8f, 0.2f), new Color(1f, 0.6f, 0.05f), 3.5f);
+        Material dark = MakeMaterial(new Color(0.035f, 0.025f, 0.07f), Color.black, 0f);
+
+        Part(PrimitiveType.Sphere, "ShooterBody", Vector3.zero, new Vector3(0.8f, 0.8f, 0.8f), shell);
+        GameObject barrel = Part(PrimitiveType.Cylinder, "ShooterBarrel", new Vector3(0f, 0.05f, 0.5f), new Vector3(0.22f, 0.35f, 0.22f), dark);
+        barrel.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+        Part(PrimitiveType.Sphere, "ShooterCore", new Vector3(0f, 0.05f, 0.88f), new Vector3(0.2f, 0.2f, 0.2f), core);
+        Part(PrimitiveType.Cube, "ShooterRing", new Vector3(0f, 0.4f, 0f), new Vector3(0.7f, 0.08f, 0.7f), core);
+    }
+
+    // ブルート：大きく重そうな赤橙の体と、肩のトゲ。
+    private void BuildBrute()
+    {
+        if (visualRoot != null) return;
+        CreateRoot();
+        HideRootRenderers();
+
+        Material shell = MakeMaterial(new Color(0.22f, 0.04f, 0.02f), new Color(0.9f, 0.15f, 0.02f), 1.3f);
+        Material core = MakeMaterial(new Color(1f, 0.55f, 0.1f), new Color(1f, 0.35f, 0.02f), 3.5f);
+        Material dark = MakeMaterial(new Color(0.05f, 0.02f, 0.02f), Color.black, 0f);
+
+        Part(PrimitiveType.Sphere, "BruteBody", Vector3.zero, new Vector3(1.0f, 1.0f, 0.95f), shell);
+        Part(PrimitiveType.Sphere, "BruteCore", new Vector3(0f, 0.05f, 0.47f), new Vector3(0.38f, 0.38f, 0.2f), core);
+        Part(PrimitiveType.Cube, "BruteBrow", new Vector3(0f, 0.32f, 0.44f), new Vector3(0.7f, 0.14f, 0.22f), dark);
+        Part(PrimitiveType.Cylinder, "BruteSpikeL", new Vector3(-0.5f, 0.45f, 0f), new Vector3(0.22f, 0.4f, 0.22f), core);
+        Part(PrimitiveType.Cylinder, "BruteSpikeR", new Vector3(0.5f, 0.45f, 0f), new Vector3(0.22f, 0.4f, 0.22f), core);
+    }
+
     public void BuildBoss()
     {
         if (visualRoot != null) return;
@@ -87,7 +151,7 @@ public class NeonCharacterVisuals : MonoBehaviour
         }
     }
 
-    private void Part(PrimitiveType type, string partName, Vector3 localPosition, Vector3 localScale, Material material)
+    private GameObject Part(PrimitiveType type, string partName, Vector3 localPosition, Vector3 localScale, Material material)
     {
         GameObject part = GameObject.CreatePrimitive(type);
         part.name = partName;
@@ -100,6 +164,7 @@ public class NeonCharacterVisuals : MonoBehaviour
 
         Renderer renderer = part.GetComponent<Renderer>();
         if (renderer != null) renderer.sharedMaterial = material;
+        return part;
     }
 
     private Material MakeMaterial(Color baseColor, Color emission, float intensity)

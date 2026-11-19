@@ -329,6 +329,12 @@ public class GameSessionManager : MonoBehaviour
             if (enemy != null) Destroy(enemy.gameObject);
         }
 
+        EnemyProjectile[] enemyShots = FindObjectsByType<EnemyProjectile>(FindObjectsSortMode.None);
+        foreach (EnemyProjectile shot in enemyShots)
+        {
+            if (shot != null) Destroy(shot.gameObject);
+        }
+
         EnergyProjectile[] projectiles = FindObjectsByType<EnergyProjectile>(FindObjectsSortMode.None);
         foreach (EnergyProjectile projectile in projectiles)
         {
